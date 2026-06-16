@@ -1,0 +1,319 @@
+\documentclass[11pt,a4paper]{article}
+
+% ===================== ENCODAGE & LANGUE =====================
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage{textcomp}
+\DeclareUnicodeCharacter{20AC}{\texteuro}
+
+% ===================== MISE EN PAGE =====================
+\usepackage[a4paper,margin=2.4cm]{geometry}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.45em}
+
+% ===================== COULEURS CHARTE GEFRADIS =====================
+\definecolor{gefblue}{HTML}{253081}
+\definecolor{gefmidnight}{HTML}{040C4D}
+\definecolor{gefyellow}{HTML}{FFD52B}
+\definecolor{gefghost}{HTML}{E7E9F4}
+
+% ===================== TITRES =====================
+\titleformat{\section}{\large\bfseries\sffamily\color{gefblue}}{\thesection.}{0.6em}{}
+\titleformat{\subsection}{\normalsize\bfseries\sffamily\color{gefmidnight}}{\thesubsection.}{0.5em}{}
+\titlespacing*{\section}{0pt}{1.3em}{0.5em}
+
+% ===================== EN-TETE / PIED =====================
+\setlength{\headheight}{22pt}
+\addtolength{\topmargin}{-8pt}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\sffamily\color{gefblue}Notes pour l'entretien}
+\fancyhead[R]{\small\sffamily Gefradis}
+\fancyfoot[C]{\small\sffamily\thepage}
+\renewcommand{\headrulewidth}{0.6pt}
+
+% ===================== BOITE "PHRASE A DIRE" =====================
+\newtcolorbox{phrasebox}{
+  colback=gefyellow!18, colframe=gefblue, boxrule=1pt, arc=2pt,
+  left=9pt, right=9pt, top=7pt, bottom=7pt,
+}
+
+\newcommand{\phrasea}[1]{%
+  \begin{phrasebox}
+  {\bfseries\color{gefblue}\textsf{Phrase à dire à l'oral}}\par\smallskip
+  \itshape #1
+  \end{phrasebox}%
+}
+
+% =====================================================================
+\begin{document}
+
+{\color{gefblue}\rule{\textwidth}{2.5pt}}\\[0.2cm]
+{\color{gefyellow}\rule{\textwidth}{6pt}}\\[0.6cm]
+{\sffamily\huge\bfseries\color{gefblue} Notes de référence pour l'entretien}\\[0.3cm]
+{\sffamily\large\color{gefmidnight} Points clés et arguments à connaître pour l'oral}\\[0.3cm]
+{\small\itshape Document vivant : il s'enrichit au fil du projet, à chaque notion
+importante à retenir pour la présentation.}\\[0.8cm]
+{\color{gefblue}\rule{\textwidth}{1pt}}
+
+\tableofcontents
+\vspace{0.6cm}
+\hrule
+\vspace{0.6cm}
+
+% =====================================================================
+\section{Pourquoi ne pas utiliser une IA de génération d'images}
+% =====================================================================
+
+\subsection{Le choix retenu}
+L'outil n'utilise \textbf{pas} d'IA générative d'images (DALL-E, Midjourney,
+Stable Diffusion) pour créer les visuels. C'est le \textbf{code}, via Playwright,
+qui assemble des éléments graphiques \emph{existants} (textes, couleurs, logo,
+gabarits). L'IA (Claude) intervient sur le \textbf{texte et la structure}, pas sur
+le dessin.
+
+\subsection{Pourquoi c'est le bon choix pour ce test}
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{Respect de la marque (brand safety) :} une IA d'image est incapable
+        de reproduire fidèlement une fenêtre ou une porte Gefradis précise. Elle
+        invente des formes, et déformerait aussi le logo.
+  \item \textbf{Le texte :} les modèles d'images écrivent encore mal le texte
+        (fautes de frappe, lettres déformées). Or nos bannières sont essentiellement
+        du texte.
+  \item \textbf{Les dimensions exactes :} générer une image au format exact
+        (320x50, 160x600...) avec une IA donne souvent des visuels écrasés ou
+        rognés.
+\end{itemize}
+
+\subsection{Le principe}
+On utilise l'IA là où elle excelle (la réflexion, le copywriting, la structure) et
+le code là où il est imbattable (la précision géométrique et le respect de la
+charte). \textbf{Claude pour le texte, Playwright pour l'assemblage.}
+
+\subsection{Comment ajouter une vraie dimension « IA image » (pour aller plus loin)}
+Deux approches possibles, sans casser l'architecture :
+
+\textbf{Option A : l'IA génère le fond d'ambiance.} L'utilisateur demande un fond
+personnalisé via une API d'image (DALL-E 3, Stable Diffusion). Exemple de prompt
+envoyé par l'application : \emph{« Une maison moderne lumineuse avec de grandes
+baies vitrées, style épuré, flou d'arrière-plan, tons bleus et blancs sourds. »}
+Le code récupère cette image, la place en arrière-plan, et Playwright superpose
+par-dessus le logo Gefradis parfait, les textes nets de Claude et le bouton
+d'action.
+
+\textbf{Option B : l'IA choisit le meilleur asset.} Si Gefradis fournit une banque
+d'images (\texttt{fenetre\_pvc.png}, \texttt{porte\_aluminium.png},
+\texttt{volet\_roulant.png}), Claude analyse le brief et renvoie le bon fichier
+dans son JSON, par exemple \texttt{"asset\_a\_utiliser": "fenetre\_pvc.png"}. Le
+code va alors chercher automatiquement le bon visuel. C'est une utilisation
+intelligente de la gestion des assets.
+
+\subsection{En résumé}
+Le projet contient bien une dimension IA : un LLM (Claude) pour l'adaptation
+intelligente des messages et la structure du contenu. La génération d'image pure
+est volontairement écartée pour garantir la fidélité au produit et au logo.
+
+\phrasea{« J'ai exclu la génération d'image pure par IA pour garantir que le produit
+Gefradis et le logo soient reproduits à 100\% sans hallucination. En revanche,
+l'IA intervient intelligemment dans la conceptualisation textuelle et contextuelle
+de la bannière. Si besoin, on peut tout à fait connecter une API de génération
+d'image (par exemple DALL-E) pour concevoir uniquement les fonds d'ambiance. »}
+
+% =====================================================================
+\section{Un RAG aurait-il sa place dans ce projet ?}
+% =====================================================================
+
+\subsection{Le verdict en une phrase}
+Pas de RAG pour le rendu du test : le cœur de la valeur IA, c'est le
+\textbf{workflow LLM} (du brief vers le copy, puis vers la mise en page), pas la
+recherche documentaire. Le RAG devient pertinent \textbf{en V2}, quand la base de
+connaissances grandit.
+
+\subsection{Rappel : ce qu'est un RAG}
+Un RAG (\emph{Retrieval-Augmented Generation}) va chercher, dans une base de
+documents, les passages utiles, puis les injecte dans le contexte du modèle au
+moment de répondre. Il sert quand la connaissance est \textbf{trop volumineuse} ou
+\textbf{trop changeante} pour tenir dans le prompt.
+
+\subsection{Pourquoi ce n'est pas nécessaire pour le test}
+\begin{itemize}[leftmargin=1.4em]
+  \item La charte actuelle (ton, couleurs, arguments) tient en quelques phrases :
+        elle va directement dans le \textbf{prompt système}. Un RAG par-dessus
+        serait de la sur-ingénierie.
+  \item Le cas d'usage est direct : un brief en entrée, un kit en sortie. Le LLM
+        seul suffit.
+  \item Savoir \emph{ne pas} ajouter un outil prématuré est aussi une compétence
+        d'ingénieur.
+\end{itemize}
+
+\subsection{Où le RAG apporterait une vraie valeur (en V2)}
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{Sélection automatique des visuels :} avec une banque de photos
+        produit (fenêtres, portes, volets) décrites par des métadonnées, retrouver
+        le bon visuel pour un brief donné. C'est l'évolution naturelle de
+        l'Option B.
+  \item \textbf{Réutilisation des campagnes passées :} retrouver les opérations
+        similaires déjà réalisées, pour garder une cohérence et inspirer le copy.
+  \item \textbf{Charte et guidelines détaillées qui évoluent :} quand la
+        documentation marketing devient volumineuse et change souvent, on la met à
+        jour dans la base, sans toucher au code.
+\end{itemize}
+
+\subsection{La nuance d'ingénieur (à connaître)}
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{C'est une question d'échelle :} le RAG se justifie quand la base
+        est grande et évolutive ; sur une petite charte fixe, le prompt suffit.
+  \item \textbf{Retrouver un asset n'exige pas forcément un RAG complet :} pour une
+        banque modeste, une simple correspondance par métadonnées, ou un choix par
+        le LLM dans une liste, suffit. La base vectorielle (\emph{embeddings}) se
+        justifie sur un grand volume.
+\end{itemize}
+
+\subsection{Le lien avec la feuille de route de Gefradis}
+Gefradis développe déjà un RAG pour la connaissance produit (accompagnement
+client). L'outil de bannières pourrait, en V2, se brancher sur cette même base.
+C'est cohérent avec leur volonté de multiplier les projets IA.
+
+\phrasea{« Pour le test, je n'ai pas mis de RAG : le cœur IA, c'est le workflow LLM
+(du brief vers le copy, puis vers la mise en page), et la charte tient dans le
+prompt. En V2, un RAG aurait une vraie valeur pour sélectionner automatiquement les
+visuels produit, réutiliser les campagnes passées et exploiter une charte détaillée
+qui évolue. C'est une question d'échelle : on l'ajoute quand la base documentaire
+devient assez grande pour le justifier. Il pourrait d'ailleurs se brancher sur le
+RAG produit que vous développez déjà. »}
+
+% =====================================================================
+\section{Comment l'application respecte toute la charte}
+% =====================================================================
+
+\subsection{Deux familles de règles, deux endroits}
+La charte se divise en deux types de règles, respectées à deux endroits
+distincts. C'est le point central de l'architecture.
+
+\subsection{La charte visuelle : dans les gabarits et le code (déterministe)}
+Les règles visuelles sont \textbf{codées en dur} dans les gabarits HTML/CSS
+(dossier \texttt{app/templates/}) :
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{Couleurs exactes} (\#253081, \#FFD52B, \#FFFDE5) déclarées en
+        variables CSS.
+  \item \textbf{Police Cabin, graisse 700 maximum} : on s'interdit d'aller
+        au-delà, même si la police variable le permettrait.
+  \item \textbf{Coins droits} : aucun arrondi.
+  \item \textbf{Structure de marque} : carte bleue, titre blanc, chiffre dans le
+        bloc jaune, figée dans le gabarit.
+  \item \textbf{Dimensions exactes} : fixées par Python et Playwright pour chaque
+        format.
+\end{itemize}
+
+\subsection{La charte éditoriale : dans le prompt système}
+Ce que les gabarits ne peuvent pas garantir, c'est la \textbf{voix} du texte. Le
+prompt système porte donc le contexte de marque (charte 4 : fabricant français,
+Dunkerque depuis 1996, direct usine, sur-mesure) et le ton (charte 6 : professeur
+ou mentor, précis, transparent), pour que le copy sonne Gefradis.
+
+\subsection{La garantie architecturale}
+Claude génère \textbf{uniquement du JSON} (le texte et le choix de variante),
+\textbf{jamais le HTML/CSS}. Il remplit seulement les emplacements texte. Il lui
+est donc \textbf{physiquement impossible} d'introduire une couleur, une police ou
+une forme hors charte. La créativité de l'IA reste enfermée dans des briques déjà
+conformes.
+
+\subsection{En toute transparence : ce qui n'est pas encore en place}
+Le logo n'est pas encore intégré aux gabarits (en attente du fichier vectoriel) ;
+la palette complète (Midnight, Ghost white) et les photos produit ne sont pas
+encore utilisées (variante typographique d'abord).
+
+\phrasea{« La charte est respectée à deux niveaux : le visuel (couleurs, police,
+formes, dimensions) est codé en dur dans les gabarits, donc déterministe ;
+l'éditorial (le ton, le positionnement) est porté par le prompt système. Et comme
+Claude ne génère que du texte, jamais le code visuel, il lui est impossible de
+sortir de la charte graphique. »}
+
+% =====================================================================
+\section{Résumer la charte dans le prompt fait-il perdre du contexte ?}
+% =====================================================================
+
+Résumer le contexte de marque pour le prompt système ne fait pas perdre
+d'information importante, pour quatre raisons.
+
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{Seule la charte éditoriale va dans le prompt.} La charte visuelle
+        n'y va pas du tout (elle est dans les gabarits). Résumer le prompt ne perd
+        donc aucune règle visuelle : Claude n'a pas besoin de connaître les codes
+        couleur, il ne dessine pas.
+  \item \textbf{Résumer n'est pas perdre.} On garde les consignes opérationnelles
+        (descripteurs de ton exacts, faits de marque clés) et on enlève seulement
+        le remplissage explicatif.
+  \item \textbf{Un prompt court et ciblé est souvent meilleur qu'un prompt
+        gonflé.} Trop de texte dilue l'attention du modèle et coûte plus cher. Le
+        but n'est pas le maximum de contexte, mais le bon contexte.
+  \item \textbf{La charte est petite.} Le contexte de marque et le ton tiennent en
+        un ou deux paragraphes : le résumé est léger.
+\end{itemize}
+
+\textbf{Garde-fous} si le ton dérive : garder des consignes concrètes (à faire, à
+éviter) ; ajouter un ou deux exemples de bon copy dans le prompt (un exemple
+transmet le ton mieux qu'une description) ; itérer sur la sortie réelle et
+réinjecter la nuance manquante. C'est du prompt engineering normal.
+
+\phrasea{« Résumer la charte pour le prompt ne fait pas perdre de contexte : seule
+la partie éditoriale y va, la partie visuelle est dans le code. Et un prompt court
+et ciblé est souvent plus efficace qu'un prompt gonflé, qui dilue l'attention du
+modèle. Au besoin, j'ajoute des exemples et j'itère sur la sortie. »}
+
+% =====================================================================
+\section{Pourquoi Claude ne génère pas le HTML/CSS}
+% =====================================================================
+
+\subsection{Deux généricités à distinguer}
+L'outil doit être générique, car il sert des \textbf{opérations commerciales}
+variées. Mais il faut distinguer :
+\begin{itemize}[leftmargin=1.4em]
+  \item la généricité du \textbf{contenu} (n'importe quelle offre, n'importe quelle
+        opération) : \textbf{nécessaire}, et c'est le rôle de Claude ;
+  \item la liberté \textbf{visuelle} (mise en page et CSS au gré de l'IA) :
+        \textbf{risquée}, et inutile.
+\end{itemize}
+Laisser Claude produire le HTML/CSS, c'est lui donner la liberté visuelle. On s'en
+abstient volontairement.
+
+\subsection{Les risques si l'IA génère le HTML/CSS}
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{Fidélité à la charte : plus aucune garantie.} L'IA pourrait sortir
+        une couleur hors palette, une autre police, une graisse interdite, des
+        coins arrondis. Avec des gabarits fixes, c'est impossible.
+  \item \textbf{Dimensions exactes : cassées.} Rien ne garantit qu'un HTML généré
+        remplisse pile le format sans déborder.
+  \item \textbf{Fiabilité.} Un JSON est validé contre un schéma (tool use) ; du
+        HTML libre peut être tronqué (limite de tokens) ou mal formé, et le rendu
+        casse.
+  \item \textbf{Cohérence du kit.} Les formats d'une même campagne risqueraient
+        d'être incohérents entre eux.
+  \item \textbf{Assets.} Logo, images produit, police, accents : c'est le code qui
+        gère ces chemins avec précision.
+  \item \textbf{Coût et débogage.} Plus de tokens, et un HTML généré est très dur à
+        tester et à maintenir.
+\end{itemize}
+
+\subsection{La bonne façon d'être générique}
+Claude reste cantonné à un \textbf{JSON structuré} ; le code rend ce JSON dans des
+gabarits flexibles. Pour l'offre, Claude indique un \textbf{type}
+(montant, pourcentage ou texte) et le code choisit le rendu adapté, \textbf{toujours
+à la charte}. On obtient la généricité du \emph{contenu} sans sacrifier la fidélité
+visuelle, les dimensions et la fiabilité.
+
+\phrasea{« Je contrains volontairement l'IA au texte structuré : c'est le code qui
+garantit la charte, les dimensions exactes et la cohérence du kit. Si je laissais
+l'IA générer le HTML, je perdrais ces garanties pour rien : la généricité dont j'ai
+besoin est dans le contenu, pas dans la liberté visuelle. »}
+
+\end{document}

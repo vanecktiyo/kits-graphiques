@@ -1,0 +1,8 @@
+{# Contenu du bloc jaune .prix, selon le type d'offre (cf. option c).
+   - montant / pourcentage : gros nombre + suffixe (la signature Gefradis)
+   - texte : l'offre en toutes lettres #}
+{%- if offre_type == 'texte' -%}
+<span class="offre-texte">{{ offre_texte }}</span>
+{%- else -%}
+<span class="nombre">{{ offre_nombre }}</span><span class="cents">{{ offre_suffixe }}</span>
+{%- endif -%}

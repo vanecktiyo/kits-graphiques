@@ -1,0 +1,29 @@
+# Secrets — NE JAMAIS commiter la clé API
+.env
+
+# Environnement virtuel Python
+.venv/
+venv/
+
+# Caches Python
+__pycache__/
+*.pyc
+
+# Sorties générées par l'outil (bannières, kits) — ne pas versionner
+output/
+
+# Dépendances front éventuelles (si build Tailwind/Node un jour)
+node_modules/
+
+# Fichiers temporaires LaTeX (on ne versionne que le .tex et le .pdf)
+*.aux
+*.log
+*.out
+*.toc
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+
+# Fichiers OS / éditeur
+.DS_Store
+.vscode/

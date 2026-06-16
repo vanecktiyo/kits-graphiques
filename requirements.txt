@@ -1,0 +1,13 @@
+# === Génération de texte (Claude) ===
+anthropic        # SDK officiel Anthropic (appels à l'API Claude)
+python-dotenv    # charge la clé API depuis le fichier .env
+
+# === Backend / API ===
+fastapi          # le framework backend (l'API)
+uvicorn[standard]  # le serveur qui fait tourner FastAPI
+jinja2           # gabarits HTML (templates)
+python-multipart  # lecture des formulaires (champs du brief)
+
+# === Composition d'images ===
+playwright       # rend le HTML/CSS en image PNG (navigateur sans interface)
+pillow           # manipulation d'images (logo, GIF plus tard)

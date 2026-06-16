@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face {
+    font-family: 'Cabin';
+    src: url('../../assets/fonts/Cabin.ttf');
+    font-weight: 100 900;
+  }
+
+  :root {
+    --gef-blue:   #253081;
+    --gef-yellow: #FFD52B;
+    --gef-beige:  #FFFDE5;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  .banniere {
+    width: 1200px;
+    height: 360px;
+    background: var(--gef-beige);
+    font-family: 'Cabin', sans-serif;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  .carte {
+    background: var(--gef-blue);
+    width: 760px;
+    height: 300px;
+    margin-left: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 28px;
+    padding: 0 50px;
+  }
+
+  .titre {
+    color: #fff;
+    font-weight: 700;       /* Cabin Bold (strict charte) */
+    font-size: 50px;
+    line-height: 1.05;
+  }
+
+  .offre { display: flex; align-items: center; gap: 22px; }
+
+  .offre-label {
+    color: #fff;
+    font-weight: 700;
+    font-size: 26px;
+  }
+
+  .prix {
+    background: var(--gef-yellow);
+    color: #000;
+    font-weight: 700;       /* Cabin Bold (strict charte) */
+    padding: 8px 24px;
+    display: flex;
+    align-items: flex-start;
+  }
+  .prix .nombre { font-size: 84px; line-height: 1; }
+  .prix .cents  { font-size: 34px; margin-top: 8px; }
+</style>
+</head>
+<body>
+  <div class="banniere">
+    <div class="carte">
+      <div class="titre">{{ titre }}</div>
+      <div class="offre">
+        <span class="offre-label">{{ offre_label }}</span>
+        <span class="prix"><span class="nombre">{{ offre_nombre }}</span><span class="cents">{{ offre_suffixe }}</span></span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

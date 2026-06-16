@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face {
+    font-family: 'Cabin';
+    src: url('../../assets/fonts/Cabin.ttf');
+    font-weight: 100 900;
+  }
+
+  :root {
+    --fond:  {{ couleur_fond }};   /* couleur de fond choisie dans la palette charte */
+    --texte: {{ couleur_texte }};  /* blanc sur fond foncé, bleu foncé sur fond clair */
+    --jaune: #FFD52B;
+    --bouton: {{ couleur_bouton }};
+    --bouton-texte: {{ couleur_bouton_texte }};
+    /* "base" = unité d'échelle calculée en Python selon le format. */
+    --base: {{ base }}px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  .banniere {
+    width:  {{ largeur }}px;
+    height: {{ hauteur }}px;
+    background: var(--fond);
+    font-family: 'Cabin', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: {{ justify }};   /* "center" (carré) ou "space-evenly" (vertical) */
+    gap: calc(var(--base) * 0.7);
+    padding: calc(var(--base) * 1.0);
+    overflow: hidden;
+    text-align: center;
+  }
+
+  .titre {
+    color: var(--texte);
+    font-weight: 700;       /* Cabin Bold (strict charte) */
+    font-size: calc(var(--base) * 1.5);
+    line-height: 1.05;
+  }
+
+  .offre-label {
+    color: var(--texte);
+    font-weight: 700;
+    font-size: calc(var(--base) * 0.85);
+  }
+
+  .prix {
+    background: var(--jaune);
+    color: #000;
+    font-weight: 700;       /* Cabin Bold (strict charte) */
+    padding: calc(var(--base) * 0.15) calc(var(--base) * 0.5);
+    display: inline-flex;
+    align-items: flex-start;
+  }
+  .prix .nombre { font-size: calc(var(--base) * 2.3); line-height: 1; }
+  .prix .cents  { font-size: calc(var(--base) * 0.9); margin-top: calc(var(--base) * 0.18); }
+  .offre-texte  { font-size: calc(var(--base) * 0.95); line-height: 1.05; }
+
+  /* Bouton d'action (affiché seulement si un CTA est demandé) */
+  .cta {
+    background: var(--bouton);
+    color: var(--bouton-texte);
+    font-weight: 700;
+    font-size: calc(var(--base) * 0.55);
+    padding: calc(var(--base) * 0.28) calc(var(--base) * 0.8);
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+</style>
+</head>
+<body>
+  <div class="banniere">
+    <div class="titre">{{ titre }}</div>
+    <div class="offre-label">{{ offre_label }}</div>
+    <div class="prix">{% include "_prix.html.j2" %}</div>
+    {% if cta %}<div class="cta">{{ cta }}</div>{% endif %}
+  </div>
+</body>
+</html>

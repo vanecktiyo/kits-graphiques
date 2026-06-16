@@ -1,0 +1,767 @@
+\documentclass[11pt,a4paper]{article}
+
+% ===================== ENCODAGE & LANGUE =====================
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage{textcomp}
+\DeclareUnicodeCharacter{20AC}{\texteuro}
+\newcommand{\eur}{\texteuro}
+
+% ===================== MISE EN PAGE =====================
+\usepackage[a4paper,margin=2.3cm]{geometry}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, fit, backgrounds, calc}
+\usepackage[hidelinks]{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.45em}
+
+% ===================== COULEURS DE LA CHARTE GEFRADIS =====================
+\definecolor{gefblue}{HTML}{253081}     % St Patricks blue
+\definecolor{gefmidnight}{HTML}{040C4D}  % Midnight blue
+\definecolor{gefyellow}{HTML}{FFD52B}    % Cyber yellow
+\definecolor{gefbeige}{HTML}{FFFDE5}     % Beige
+\definecolor{gefghost}{HTML}{E7E9F4}     % Ghost white
+\definecolor{gefgrey}{HTML}{E4E4E4}      % Platinum
+
+% ===================== STYLES DE TITRES =====================
+\titleformat{\section}{\Large\bfseries\sffamily\color{gefblue}}{\thesection.}{0.6em}{}
+\titleformat{\subsection}{\large\bfseries\sffamily\color{gefmidnight}}{\thesubsection.}{0.6em}{}
+\titlespacing*{\section}{0pt}{1.4em}{0.6em}
+
+% ===================== EN-TETE / PIED =====================
+\setlength{\headheight}{22pt}
+\addtolength{\topmargin}{-10pt}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\sffamily\color{gefblue}Cahier de conception}
+\fancyhead[R]{\small\sffamily Générateur de kits graphiques}
+\fancyfoot[C]{\small\sffamily\thepage}
+\renewcommand{\headrulewidth}{0.6pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{gefblue}\leaders\hrule height \headrulewidth\hfill}}
+
+% ===================== CODE / JSON =====================
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  frame=single,
+  rulecolor=\color{gefblue},
+  backgroundcolor=\color{gefghost!45},
+  breaklines=true,
+  columns=fullflexible,
+  showstringspaces=false,
+  xleftmargin=4pt,
+  framexleftmargin=2pt,
+}
+
+% ===================== STYLES TIKZ =====================
+\tikzset{
+  >={Stealth[round]},
+  block/.style={rectangle, rounded corners=2pt, draw=gefblue, very thick, fill=gefblue!8,
+                align=center, minimum width=2.3cm, minimum height=1cm, font=\small\sffamily},
+  store/.style={rectangle, draw=gefmidnight, very thick, fill=gefyellow!30,
+                align=center, minimum width=2.3cm, minimum height=1cm, font=\small\sffamily},
+  ext/.style={rectangle, rounded corners=2pt, draw=black!55, very thick, fill=black!4,
+              align=center, minimum width=2.3cm, minimum height=1cm, font=\small\sffamily},
+  uc/.style={ellipse, draw=gefblue, very thick, fill=gefblue!7,
+             align=center, minimum width=3.6cm, minimum height=1.05cm, font=\footnotesize\sffamily, inner sep=1pt},
+  proc/.style={rectangle, rounded corners=2pt, draw=gefblue, very thick, fill=gefblue!8,
+               align=center, text width=2.6cm, minimum height=0.9cm, font=\footnotesize\sffamily},
+  decision/.style={diamond, draw=gefblue, very thick, fill=gefyellow!30,
+                   align=center, aspect=2.9, inner sep=0pt, font=\scriptsize\sffamily},
+  term/.style={rectangle, rounded corners=9pt, draw=gefmidnight, very thick, fill=gefghost,
+               align=center, minimum width=2.2cm, minimum height=0.8cm, font=\footnotesize\sffamily},
+  arr/.style={->, very thick, gefmidnight},
+  flow/.style={->, very thick, gefblue},
+}
+
+% ===================== PAGE DE TITRE =====================
+\begin{document}
+\begin{titlepage}
+\thispagestyle{empty}
+\vspace*{1.5cm}
+{\color{gefblue}\rule{\textwidth}{3pt}}\\[0.3cm]
+{\color{gefyellow}\rule{\textwidth}{8pt}}\\[1.5cm]
+
+\begin{flushleft}
+{\sffamily\Huge\bfseries\color{gefblue} Cahier de conception}\\[0.6cm]
+{\sffamily\LARGE\color{gefmidnight} Outil de génération automatique\\ de kits graphiques d'opérations commerciales}\\[1.0cm]
+{\sffamily\large Test de développement : alternance Développeur IA}\\[0.2cm]
+{\sffamily\large Société \textbf{Gefradis} (groupe Im4Pulse)}\\[2.0cm]
+\end{flushleft}
+
+{\color{gefyellow}\rule{\textwidth}{8pt}}\\[0.3cm]
+{\color{gefblue}\rule{\textwidth}{3pt}}\\[1.2cm]
+
+\begin{flushleft}
+{\sffamily\large
+\textbf{Auteur :} Vaneck \\[0.2cm]
+\textbf{Version :} 0.3 (conception)\\[0.2cm]
+\textbf{Date :} \today
+}
+\end{flushleft}
+
+\vfill
+{\small\itshape Document technique décrivant la conception de l'application
+avant le développement. Le cahier des charges (le besoin) est défini par la note
+de cadrage fournie par le client ; le présent document décrit la solution retenue.}
+\end{titlepage}
+
+% ===================== SOMMAIRE =====================
+\tableofcontents
+\newpage
+
+% =====================================================================
+\section{Contexte et objectif}
+% =====================================================================
+
+\subsection{Contexte}
+Gefradis est une entreprise de menuiserie PVC sur-mesure (portes, fenêtres),
+qui vend en ligne aux particuliers et aux professionnels. Le service marketing
+mène régulièrement des \textbf{opérations commerciales}. Aujourd'hui,
+la production des visuels (les bannières) de ces opérations dépend de ressources
+créatives et graphiques, ce qui ralentit le déploiement des campagnes.
+
+\subsection{Objectif}
+Mettre à disposition du métier marketing un \textbf{outil web} qui lui permet de
+réaliser, de manière autonome et sans graphiste, un \textbf{kit graphique}
+complet (un ensemble de bannières à tous les formats utiles), conforme à la
+charte Gefradis, prêt à être déployé sur le site et sur les plateformes
+publicitaires (Google et Meta).
+
+\subsection{Périmètre}
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{Dans le périmètre :} la saisie d'un brief, la génération du texte
+        des bannières par IA, la composition des bannières à la charte (tous les
+        formats de la note), l'aperçu et l'ajustement avant l'export, le
+        téléchargement du kit. Versions statique et animée.
+  \item \textbf{Hors périmètre (pour ce rendu) :} la gestion des comptes
+        utilisateurs, la connexion directe aux régies publicitaires (publication
+        automatique) et un éditeur graphique manuel libre.
+\end{itemize}
+
+% =====================================================================
+\section{Besoins fonctionnels}
+% =====================================================================
+L'outil suit le principe \textbf{entrée, traitement, sortie}.
+
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{F1. Saisie du brief :} l'utilisateur décrit la mécanique
+        commerciale (1.1), le message commercial (1.2) et, en option, les
+        illustrations (1.3 : style souhaité et demande éventuelle d'une image).
+  \item \textbf{F2. Sélection des formats :} l'utilisateur coche les bannières
+        à produire (site, Google Display, Google Pmax, Meta).
+  \item \textbf{F3. Génération du texte :} le système transforme le brief en
+        contenu structuré (accroche, offre de type montant, pourcentage ou texte,
+        appel à l'action) et déduit la catégorie, la couleur de fond et le besoin
+        d'image.
+  \item \textbf{F4. Composition :} selon le \textbf{type} de bannière (bandeau site,
+        header, publicité, format fin), le système assemble le texte, les couleurs,
+        la police, le logo et, si besoin, l'image de la catégorie (banque d'images),
+        aux dimensions exactes et à la charte.
+  \item \textbf{F5. Aperçu :} le système affiche toutes les bannières générées.
+  \item \textbf{F6. Ajustement et régénération :} l'utilisateur peut modifier
+        le brief et relancer la génération autant de fois que nécessaire.
+  \item \textbf{F7. Téléchargement :} le système livre le kit complet sous la
+        forme d'une archive \texttt{.zip}.
+\end{itemize}
+
+% =====================================================================
+\section{Besoins non fonctionnels}
+% =====================================================================
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{NF1. Conformité à la charte :} respect strict et systématique
+        des couleurs, de la police (Cabin), du logo et du ton de la marque.
+  \item \textbf{NF2. Simplicité :} l'outil doit être utilisable par un profil non
+        technique, sans logiciel de graphisme.
+  \item \textbf{NF3. Rapidité :} la génération d'un kit s'effectue en un temps
+        raisonnable (de quelques secondes à quelques dizaines de secondes).
+  \item \textbf{NF4. Maîtrise des coûts :} usage raisonné de l'API (le modèle ne
+        génère que du texte court).
+  \item \textbf{NF5. Sécurité :} la clé d'API n'est jamais écrite dans le code
+        (fichier \texttt{.env} exclu du dépôt).
+  \item \textbf{NF6. Reproductibilité :} environnement isolé (venv) décrit par un
+        fichier de dépendances.
+\end{itemize}
+
+% =====================================================================
+\section{Catalogue des formats à produire}
+% =====================================================================
+Les dimensions du site sont à confirmer auprès du client ; celles des régies
+publicitaires sont des standards.
+
+\begin{center}\small
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{3.0cm} >{\raggedright\arraybackslash}p{4.3cm} >{\raggedright\arraybackslash}p{4.5cm}@{}}
+\toprule
+\textbf{Destination} & \textbf{Élément} & \textbf{Dimensions (px) / type} \\
+\midrule
+Site & Header page d'accueil & Desktop et mobile (à préciser) \\
+Site & Bandeau page catégorie & Desktop et mobile (à préciser) \\
+Google Display & Pavé / Bannière / Skyscraper / Mobile & 300x250, 728x90, 160x600, 320x50 (statique et animé) \\
+Google Pmax & Visuels statiques & Paysage 1200x628, Carré 1200x1200, Portrait 960x1200 \\
+Meta (FB / Insta) & Carré / Portrait / Story & 1080x1080, 1080x1350, 1080x1920 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% =====================================================================
+\section{Spécification graphique (charte)}
+% =====================================================================
+Ces éléments constituent les \emph{jetons de design} (design tokens) appliqués
+par le moteur de composition.
+
+\subsection{Couleurs}
+\begin{center}\small
+\begin{tabular}{@{}l l l@{}}
+\toprule
+\textbf{Nom} & \textbf{Hex} & \textbf{Usage} \\
+\midrule
+St Patricks blue & \texttt{\#253081} & Fond principal des bannières \\
+Midnight blue & \texttt{\#040C4D} & Variante foncée \\
+Cyber yellow & \texttt{\#FFD52B} & Accent et mise en avant du chiffre clé \\
+Beige & \texttt{\#FFFDE5} & Fond clair / arrière-plan \\
+Blanc & \texttt{\#FFFFFF} & Texte sur fond bleu \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Typographie, logo, ton}
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{Police :} Cabin (Regular et Bold). Elle est \emph{self-hosted}
+        (fichier \texttt{.ttf} embarqué dans le projet via \texttt{@font-face}),
+        avec une police sans-serif système en repli. Pas de dépendance à un CDN au
+        moment du rendu.
+  \item \textbf{Logo :} deux versions (bleu sur fond clair ; blanc sur fond
+        foncé), à poser selon la couleur du fond.
+  \item \textbf{Ton :} professeur ou mentor, précis, professionnel, clair sans
+        être trop technique.
+  \item \textbf{Imagerie :} esthétique épurée, minimaliste, « sortie d'usine ».
+\end{itemize}
+
+
+% =====================================================================
+\section{Architecture}
+% =====================================================================
+
+\subsection{Architecture fonctionnelle (exécution locale)}
+La figure~\ref{fig:archi} montre les composants et le flux principal.
+
+\begin{figure}[h]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[node distance=0.95cm and 1.25cm]
+  \node[ext] (user) {Responsable\\Marketing};
+  \node[block, right=of user] (front) {Frontend\\HTML/Tailwind};
+  \node[block, right=of front] (back) {Backend\\FastAPI};
+  \node[block, right=of back] (compo) {Moteur de\\composition};
+  \node[store, right=of compo] (kit) {Kit\\(.zip)};
+  \node[block, above=0.9cm of back] (copy) {Module Copy\\(Claude)};
+  \node[store, below=0.9cm of compo] (assets) {Assets de marque\\(couleurs, Cabin, logo)};
+
+  \draw[arr] (user) -- (front);
+  \draw[arr] (front) -- node[above,font=\scriptsize]{HTTP} (back);
+  \draw[arr, <->] (back) -- node[right,font=\scriptsize]{brief / JSON} (copy);
+  \draw[arr] (back) -- node[above,font=\scriptsize]{texte} (compo);
+  \draw[arr] (compo) -- node[above,font=\scriptsize]{PNG} (kit);
+  \draw[arr] (assets) -- (compo);
+  \draw[arr, dashed] (kit.south) to[bend right=22] node[below,font=\scriptsize]{aperçu} (front.south);
+\end{tikzpicture}%
+}
+\caption{Architecture fonctionnelle (exécution locale).}
+\label{fig:archi}
+\end{figure}
+
+\subsection{Architecture de production (GCP)}
+En production, l'application est hébergée et appelle les modèles via les services
+Google Cloud (figure~\ref{fig:gcp}).
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[node distance=1.0cm and 1.5cm, font=\small\sffamily]
+  \node[ext] (user) {Marketing};
+  \node[block, right=2.0cm of user, minimum width=3.4cm] (app) {App FastAPI\\(+ frontend)};
+  \node[draw=gefblue, very thick, dashed, rounded corners, fit=(app), inner sep=10pt, label={[gefblue,font=\footnotesize\bfseries]above:Cloud Run}] (cr) {};
+  \node[block, right=3.0cm of app] (vertex) {Vertex AI\\(Claude)};
+  \node[store, below=1.2cm of app] (storage) {Cloud Storage\\(assets + kits)};
+
+  \draw[arr] (user) -- node[above,font=\scriptsize]{URL} (app);
+  \draw[arr] (app) -- node[above,font=\scriptsize]{copy} (vertex);
+  \draw[arr] (app) -- (storage);
+\end{tikzpicture}
+\caption{Architecture cible en production sur Google Cloud Platform.}
+\label{fig:gcp}
+\end{figure}
+
+\subsection{Pile technique}
+\begin{center}\small
+\begin{tabular}{@{}l l@{}}
+\toprule
+\textbf{Couche} & \textbf{Technologie} \\
+\midrule
+Langage & Python \\
+Backend / API & FastAPI \\
+Frontend (interface) & HTML/CSS et Tailwind \\
+Génération de texte & API Claude (SDK \texttt{anthropic}) \\
+Composition d'images & HTML/CSS rendu en PNG via Playwright \\
+Animations & GIF, HTML5, MP4 (à partir d'une source unique) \\
+Production & Cloud Run, Vertex AI, Cloud Storage \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% =====================================================================
+\section{Cas d'utilisation}
+% =====================================================================
+La figure~\ref{fig:uc} présente le diagramme de cas d'utilisation. L'acteur
+unique est le \textbf{Responsable Marketing}.
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[font=\footnotesize\sffamily]
+  % --- acteur (bonhomme bâton) ---
+  \draw[very thick] (0,0.55) circle (0.2);
+  \draw[very thick] (0,0.35) -- (0,-0.25);
+  \draw[very thick] (-0.32,0.1) -- (0.32,0.1);
+  \draw[very thick] (0,-0.25) -- (-0.26,-0.7);
+  \draw[very thick] (0,-0.25) -- (0.26,-0.7);
+  \node[align=center, font=\footnotesize\bfseries] at (0,-1.15) {Responsable\\Marketing};
+
+  % --- frontière du système ---
+  \draw[gefblue, very thick, rounded corners]
+        (2.6,-4.7) rectangle (9.6,3.3);
+  \node[gefblue, font=\small\bfseries, anchor=north] at (6.1,3.25)
+        {Outil de génération de kits graphiques};
+
+  % --- cas d'utilisation ---
+  \node[uc] (u1) at (6.1,2.2)  {Saisir le brief};
+  \node[uc] (u2) at (6.1,1.05) {Sélectionner les formats};
+  \node[uc] (u3) at (6.1,-0.1) {Générer le kit};
+  \node[uc] (u4) at (6.1,-1.25){Prévisualiser les bannières};
+  \node[uc] (u5) at (6.1,-2.4) {Ajuster et régénérer};
+  \node[uc] (u6) at (6.1,-3.55){Télécharger le kit};
+
+  % --- associations ---
+  \foreach \u in {u1,u2,u3,u4,u5,u6}{
+    \draw[very thick, gefmidnight] (0.45,0.05) -- (\u.west);
+  }
+\end{tikzpicture}
+\caption{Diagramme de cas d'utilisation.}
+\label{fig:uc}
+\end{figure}
+
+\textbf{Scénario nominal} (\emph{Générer le kit}) : l'utilisateur saisit le brief
+et sélectionne les formats, puis déclenche la génération ; le système produit les
+bannières et les affiche ; l'utilisateur prévisualise, ajuste si besoin (la
+boucle), puis télécharge le kit.
+
+% =====================================================================
+\section{Vue dynamique : séquence de génération}
+% =====================================================================
+La figure~\ref{fig:seq} détaille les échanges lors d'une génération de kit, y
+compris la \textbf{visualisation de l'aperçu} et la \textbf{boucle de
+régénération} : l'utilisateur ajuste son brief et relance autant de fois que
+nécessaire (cadre \emph{loop}) avant de télécharger le kit.
+
+\begin{figure}[h]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[font=\footnotesize\sffamily]
+  % objets
+  \node[block] (U)  at (0,0)    {Utilisateur};
+  \node[block] (UI) at (4.0,0)  {Application\\(FastAPI)};
+  \node[block] (CL) at (8.0,0)  {API Claude};
+  \node[block] (MO) at (12.0,0) {Moteur\\composition};
+  % lignes de vie
+  \foreach \n in {U,UI,CL,MO}{ \draw[dashed, gray] (\n.south) -- ++(0,-10.6); }
+  % message initial
+  \draw[arr] (0,-1.0)  -- (4.0,-1.0)  node[midway,above,font=\scriptsize]{saisit le brief};
+  % --- cadre de boucle (loop UML) ---
+  \draw[gefblue, thick] (-1.1,-1.7) rectangle (13.3,-8.3);
+  \fill[gefblue] (-1.1,-1.7) rectangle (-0.2,-2.2);
+  \node[white, font=\scriptsize\bfseries] at (-0.65,-1.95) {loop};
+  \node[gefmidnight, font=\scriptsize, anchor=west] at (-0.05,-1.95) {[tant que l'utilisateur n'est pas satisfait]};
+  % messages de la boucle
+  \draw[arr] (0,-2.7)  -- (4.0,-2.7)  node[midway,above,font=\scriptsize]{ajuste le brief + (Re-)Générer};
+  \draw[arr] (4.0,-3.7) -- (8.0,-3.7)  node[midway,above,font=\scriptsize]{envoie le brief (prompt)};
+  \draw[arr,dashed] (8.0,-4.6) -- (4.0,-4.6) node[midway,above,font=\scriptsize]{copy structuré (JSON)};
+  \draw[arr] (4.0,-5.5) -- (12.0,-5.5) node[midway,above,font=\scriptsize]{copy + format};
+  \draw[arr,dashed] (12.0,-6.4) -- (4.0,-6.4) node[midway,above,font=\scriptsize]{bannières (PNG)};
+  \draw[arr] (4.0,-7.6) -- (0,-7.6)   node[midway,above,font=\scriptsize]{affiche l'aperçu (visualisation)};
+  % --- après la boucle (satisfait) ---
+  \draw[arr] (0,-9.0)  -- (4.0,-9.0)  node[midway,above,font=\scriptsize]{clique Télécharger};
+  \draw[arr,dashed] (4.0,-9.9) -- (0,-9.9) node[midway,above,font=\scriptsize]{kit .zip};
+\end{tikzpicture}%
+}
+\caption{Diagramme de séquence : génération, visualisation de l'aperçu et boucle de régénération.}
+\label{fig:seq}
+\end{figure}
+
+% =====================================================================
+\section{Contrat de données}
+% =====================================================================
+Le \emph{contrat de données} définit les structures échangées entre l'interface,
+l'IA et le moteur.
+
+\subsection{Entrée : le brief (formulaire)}
+\begin{itemize}[leftmargin=1.4em]
+  \item \texttt{mecanique} (1.1) : texte libre (conditions et niveaux de remise).
+  \item \texttt{message} (1.2) : nom de l'opération et accroche.
+  \item \texttt{illustrations} (1.3) : style graphique souhaité et éventuelle demande
+        d'une image (optionnel). À défaut, la charte s'applique.
+  \item \texttt{formats} : liste des bannières à produire (cases cochées).
+\end{itemize}
+
+\subsection{Sortie de Claude : le copy structuré}
+Claude renvoie un \textbf{JSON} (le contrat entre l'IA et le moteur). Exemple
+pour le cas de test :
+
+\begin{lstlisting}
+{
+  "categorie":     "transversale",
+  "titre":         "Gros projets = Grosses Remises",
+  "offre_type":    "montant",
+  "offre_label":   "Jusqu'a",
+  "offre_nombre":  "500",
+  "offre_suffixe": "EUR",
+  "offre_texte":   "",
+  "cta":           "J'en profite",
+  "couleur_fond":  "#253081",
+  "illustrer":     false
+}
+\end{lstlisting}
+
+\textbf{Claude ne produit que ce JSON, jamais de HTML.} C'est le code Python qui
+injecte ensuite ces valeurs dans un \textbf{gabarit fixe} (Jinja2) aux dimensions
+exactes du format, avant le rendu par Playwright. Ce choix garantit l'absence
+d'erreurs de parsing (HTML tronqué, guillemets mal échappés) et le respect strict
+des dimensions. Les champs clés : \texttt{categorie} (une des familles produit, ou
+\texttt{transversale}) sert à choisir l'image ; \texttt{offre\_type}
+(\texttt{montant}, \texttt{pourcentage} ou \texttt{texte}) commande le rendu de
+l'offre ; \texttt{couleur\_fond} est choisie dans la palette de la charte selon le
+brief (1.3) ; \texttt{illustrer} indique si une image accompagne les pubs. Le
+\textbf{même message} est conservé sur tous les formats : les gabarits adaptent la
+taille du texte aux petits formats.
+
+% =====================================================================
+\section{Système de design et génération créative}
+% =====================================================================
+L'outil est \textbf{générique} : il ne reproduit pas un modèle unique, il produit
+des bannières \textbf{variées}, adaptées à chaque brief et à chaque format. La
+charte n'est pas un moule, mais un \textbf{cadre} à respecter. La conception repose
+sur deux rôles complémentaires.
+
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{Le système de design (les contraintes) :} la charte encodée en
+        \emph{gabarits réutilisables} pré-construits aux dimensions exactes, avec
+        \textbf{toute la palette de la charte}, la police Cabin et le logo. Chaque
+        rendu est conforme à la charte. C'est le cadre non négociable qui garantit
+        le respect de la marque et des dimensions.
+  \item \textbf{L'IA, directrice artistique (la créativité) :} à partir du brief
+        (en particulier le champ \textbf{1.3 illustrations}), Claude rédige le copy
+        et \textbf{choisit la couleur de fond} dans la palette de la charte (champ
+        \texttt{couleur\_fond}). Elle ne génère pas de HTML : c'est le code qui rend.
+\end{itemize}
+
+Ce choix (l'IA \emph{sélectionne et paramètre}, le code \emph{rend}) est le plus
+\textbf{fiable} : aucune erreur de HTML généré, des dimensions toujours exactes, la
+charte toujours respectée. La créativité vient du choix des couleurs de la charte et
+de la composition, guidé par le brief.
+
+\textbf{Style par défaut :} si le brief ne précise aucun style (champ 1.3 vide), le
+fond prend le \textbf{bleu St Patricks} \texttt{\#253081}, créant une variante
+purement \textbf{typographique}, très propre.
+
+\subsection{Les types de bannières}
+Chaque format appartient à un \textbf{type} qui détermine sa mise en page (le type
+se déduit du nom du format) :
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{Bandeau de page catégorie} (site) : image d'ambiance de la
+        catégorie en fond + \textbf{carte bleue} en surimpression (titre + offre).
+  \item \textbf{Header d'accueil} (site, « hero ») : grand message à gauche, offre
+        (et produit détouré si le brief le demande) à droite, sur fond de la charte.
+  \item \textbf{Publicité} (Google Display, Pmax, Meta) : mise en page typographique
+        (accroche + offre + bouton optionnel). Si le brief (1.3) demande une image,
+        le \textbf{produit détouré} est placé \emph{dans le cadre}, à côté du texte
+        (disposition en ligne ou en colonne selon le format).
+  \item \textbf{Formats fins} (728x90, 320x50) : gabarit dédié ; le contenu est mis
+        \textbf{à l'échelle automatiquement} pour tenir, quel que soit le texte.
+\end{itemize}
+Les bannières \textbf{site} portent toujours une image ; les \textbf{pubs} seulement
+si le brief le demande.
+
+\subsection{La banque d'images}
+Les visuels produit sont organisés par catégorie, dans
+\texttt{assets/produit/categorie/<Categorie>/}, avec deux sous-dossiers :
+\texttt{Bandeau page categorie} (photo d'ambiance, pour le bandeau) et
+\texttt{promo} (produit \textbf{détouré}, fond transparent, pour les pubs). La
+\textbf{catégorie} est déduite de l'offre par Claude ; le code va chercher la bonne
+image. Pour une opération \textbf{transversale} (tout le catalogue), plusieurs
+images de catégories sont assemblées \textbf{côte à côte} (montage) en fond des
+bannières site.
+
+\subsection{Une offre générique}
+L'outil sert des opérations commerciales variées : l'offre peut être un
+\textbf{montant} (« Jusqu'à 500 € »), un \textbf{pourcentage} (« -26 \% ») ou un
+\textbf{texte} (« Livraison offerte »). Claude renseigne \texttt{offre\_type} et le
+gabarit rend chacun avec le style adapté (gros chiffre, ou texte), toujours dans le
+bloc jaune de la charte. Seul le \textbf{message} (l'accroche) est affiché, jamais
+le détail des paliers de la mécanique, qui reste sur la page de destination.
+
+% =====================================================================
+\section{Parcours utilisateur (UX)}
+% =====================================================================
+La figure~\ref{fig:flow} illustre la boucle aperçu et ajustement, et la
+figure~\ref{fig:wire} un schéma d'écran (wireframe).
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[node distance=0.8cm and 1.0cm]
+  \node[term] (start) {Début};
+  \node[proc, right=of start] (form) {Remplir le formulaire};
+  \node[proc, right=of form] (gen) {Générer};
+  \node[proc, right=of gen] (prev) {Aperçu};
+  \node[decision, below=1.0cm of prev] (ok) {Satisfait ?};
+  \node[proc, left=1.2cm of ok] (adj) {Ajuster le brief};
+  \node[term, below=1.0cm of ok] (dl) {Télécharger};
+
+  \draw[flow] (start) -- (form);
+  \draw[flow] (form) -- (gen);
+  \draw[flow] (gen) -- (prev);
+  \draw[flow] (prev) -- (ok);
+  \draw[flow] (ok) -- node[above,font=\scriptsize]{Non} (adj);
+  \draw[flow] (adj) |- (gen);
+  \draw[flow] (ok) -- node[right,font=\scriptsize]{Oui} (dl);
+\end{tikzpicture}
+\caption{Parcours utilisateur : la boucle aperçu, ajustement, régénération.}
+\label{fig:flow}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[font=\footnotesize\sffamily]
+  % cadre fenêtre
+  \draw[very thick, gefblue, rounded corners] (0,0) rectangle (13,7.5);
+  \fill[gefblue] (0,7.0) rectangle (13,7.5);
+  \node[white, font=\small\bfseries, anchor=west] at (0.3,7.25) {Générateur de kits graphiques (Gefradis)};
+
+  % colonne formulaire (gauche)
+  \draw[gefgrey, very thick] (4.3,0.2) -- (4.3,6.8);
+  \node[gefmidnight, font=\small\bfseries, anchor=west] at (0.3,6.5) {1. Le brief};
+  \foreach \y/\lab in {5.7/Mécanique de remise, 4.9/Message et opération, 4.1/Style (optionnel)}{
+    \node[anchor=west] at (0.3,\y+0.25) {\lab};
+    \draw[fill=gefghost] (0.3,\y-0.25) rectangle (4.0,\y+0.05);
+  }
+  \node[gefmidnight, font=\small\bfseries, anchor=west] at (0.3,3.3) {2. Les formats};
+  \foreach \y/\lab in {2.7/Site, 2.2/Google Display, 1.7/Google Pmax, 1.2/Meta}{
+    \draw (0.4,\y) rectangle ++(0.25,0.25);
+    \node[anchor=west] at (0.75,\y+0.12) {\lab};
+  }
+  \draw[fill=gefyellow] (0.3,0.35) rectangle (4.0,0.85);
+  \node[black, font=\bfseries] at (2.15,0.6) {Générer le kit};
+
+  % zone aperçu (droite)
+  \node[gefmidnight, font=\small\bfseries, anchor=west] at (4.6,6.5) {Aperçu des bannières};
+  \foreach \x/\y in {4.7/4.4, 7.2/4.4, 9.7/4.4, 4.7/2.0, 7.2/2.0, 9.7/2.0}{
+    \draw[fill=gefblue!10] (\x,\y) rectangle ++(2.1,1.5);
+  }
+  \draw[fill=gefyellow] (10.0,0.35) rectangle (12.9,0.95);
+  \node[black, font=\bfseries\scriptsize] at (11.45,0.65) {Télécharger .zip};
+\end{tikzpicture}
+\caption{Wireframe de l'interface (formulaire à gauche, aperçu à droite).}
+\label{fig:wire}
+\end{figure}
+
+\subsection{Style de l'interface}
+L'interface applique la charte \emph{à la manière d'un produit}, et non comme une
+bannière : une \textbf{base neutre et claire} (fonds blancs et gris clairs de la
+charte, \texttt{\#F9FAFB} et \texttt{\#F3F4F6}) et la marque utilisée en
+\textbf{accents} (bandeau supérieur et boutons en bleu \texttt{\#253081}, bouton
+d'action principal « Générer » en jaune \texttt{\#FFD52B}, titres en police Cabin).
+L'objectif est un rendu d'outil professionnel et lisible, distinct du style
+« bannière » réservé au livrable.
+
+% =====================================================================
+\section{Rôle de l'IA et stratégie de prompt}
+% =====================================================================
+\textbf{Ce que fait l'IA (Claude) :} elle joue \textbf{deux rôles}. D'abord celui
+de \emph{concepteur-rédacteur} : elle rédige le copy. Ensuite celui de
+\emph{directeur artistique} : elle \textbf{choisit la variante de mise en page} la
+plus adaptée au brief et au format (champ \texttt{style\_variant}), et peut en
+proposer plusieurs. \textbf{Ce qu'elle ne fait pas :} générer du HTML, ni produire
+une image matricielle. Sa sortie est \textbf{uniquement un JSON} (copy et variante) ;
+c'est le code Python qui injecte ce JSON dans un gabarit fixe, rendu en PNG par
+Playwright. Cela garantit l'absence d'erreur de parsing, des dimensions toujours
+exactes et le respect strict de la charte.
+
+\textbf{Stratégie de prompt :} un \emph{prompt système} fixe le rôle et surtout les
+\textbf{contraintes} (« Tu es le directeur artistique de Gefradis. Respecte
+strictement la charte. Réponds uniquement par un JSON valide, sans HTML. »). Le
+\emph{message utilisateur} fournit le brief et le format visé. Un exemple complet de
+prompt figure en annexe (section~\ref{sec:annexe-prompt}).
+
+\textbf{Choix : pas de génération d'image (GPT ou Imagen).} La charte (page
+« Personnalité de l'imagerie ») demande des photos \emph{réelles} de produits,
+brutes et épurées, et non des images inventées. Les visuels éventuels proviennent
+donc des \textbf{photos réelles} de Gefradis (fond d'ambiance, produits détourés),
+plutôt que d'une génération. L'architecture reste prête à accueillir un module de
+génération d'illustration si le client le souhaite.
+
+% =====================================================================
+\section{Plan de construction (lotissement)}
+% =====================================================================
+La construction se fait par couches, de la plus simple à la plus robuste
+(figure~\ref{fig:plan}) : chaque couche fonctionne avant d'attaquer la suivante,
+ce qui réduit le risque sur le planning.
+
+\begin{figure}[h]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[font=\footnotesize\sffamily]
+  \draw[arr, very thick] (-0.3,0) -- (15.3,0);
+  \foreach \x/\lab in {1.2/{Étape 1\\Bannière\\statique (PNG)},
+                       4.2/{Étape 2\\Tous les\\formats},
+                       7.2/{Étape 3\\Intégration\\Claude},
+                       10.2/{Étape 4\\Interface\\web (API)},
+                       13.2/{Étape 5\\Animations\\GIF/HTML5/MP4}}{
+    \fill[gefblue] (\x,0) circle (3.5pt);
+    \node[proc] at (\x,1.2) {\lab};
+    \draw[arr, thin] (\x,0.55) -- (\x,0.08);
+  }
+\end{tikzpicture}%
+}
+\caption{Lotissement : étapes de construction successives.}
+\label{fig:plan}
+\end{figure}
+
+\textbf{Livrable cible} : une \textbf{application complète}, qui fonctionne de bout
+en bout (toutes les étapes, animations comprises). C'est l'objectif, et non un
+périmètre réduit. Le lotissement ci-dessus est l'\textbf{ordre de construction} :
+on intègre le \textbf{flux complet} tôt (une tranche verticale sur un format),
+puis on enrichit en largeur (tous les formats), en mouvement (animations) et en
+finition (déploiement Cloud Run). Le module \emph{photo produit} s'ajoute selon la
+réponse du client. Pour les animations, on privilégie le \textbf{GIF} (assemblé en
+Python avec Pillow à partir de quelques captures PNG) ; les formats \textbf{HTML5}
+et \textbf{MP4}, plus lourds, sont relégués en évolution (V2) pour ne pas mettre le
+délai en péril.
+
+% =====================================================================
+\section{Décisions, hypothèses et question ouverte}
+% =====================================================================
+\subsection{Décisions assumées}
+\begin{center}\small
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{5.2cm} >{\raggedright\arraybackslash}p{9.5cm}@{}}
+\toprule
+\textbf{Sujet} & \textbf{Décision} \\
+\midrule
+Format de sortie & Images finales \textbf{non éditables} ; l'ajustement se fait en régénérant dans l'outil \\
+Format statique & PNG \\
+Livraison du kit & Archive \texttt{.zip} \\
+Bannières animées & Plusieurs formats (HTML5, GIF, MP4) à partir d'une source unique \\
+Google Pmax & Tailles standard \\
+Mécanique commerciale & Donnée saisie par l'utilisateur : l'outil est \textbf{générique} \\
+Référence visuelle & Fond bleu, titre blanc et chiffre clé dans un bloc jaune \\
+Interface & Architecture découplée : backend \textbf{FastAPI} et frontend \textbf{HTML/Tailwind} ; UX en base neutre avec accents de marque \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Question ouverte (à poser au client)}
+\textbf{Les visuels (section 1.3 de la note) :} les bannières doivent-elles
+intégrer des \emph{photos produit} (fenêtres, portes), ou rester \emph{basées sur
+le texte, les couleurs et le logo} (sans photo) ? Si des visuels sont attendus,
+une banque de \emph{photos détourées} peut-elle être fournie ?
+
+% =====================================================================
+\section{Risques et limites}
+% =====================================================================
+\begin{center}\small
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{5.2cm} >{\raggedright\arraybackslash}p{9.5cm}@{}}
+\toprule
+\textbf{Risque} & \textbf{Mitigation} \\
+\midrule
+Complexité des bannières animées & Statique d'abord ; pour l'animé, GIF assemblé avec Pillow ; HTML5 et MP4 en V2 \\
+Compatibilité Playwright et Python récent & Solution de repli (Pillow ou un rendu HTML alternatif) si besoin \\
+Mémoire de Playwright (Chromium) en production & Allouer 2 à 4 Go de RAM sur Cloud Run ; limiter la concurrence des rendus \\
+Assets manquants (logo source, photos) & Logo recadrable depuis la charte ; démarrage possible sans photo (fond uni) \\
+Dimensions du site inconnues & À confirmer auprès du client ; valeurs standard en attendant \\
+Coût et qualité du copy IA & Prompt contraint au format JSON, sorties courtes, modèle adapté au besoin \\
+Complexité du frontend (FastAPI et Tailwind) & Frontend volontairement léger (pas de SPA lourde) ; construit progressivement \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% =====================================================================
+\section{Critères de réussite et tests}
+% =====================================================================
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{C1 :} le rendu respecte la charte (couleurs, Cabin, logo), vérifié par contrôle visuel.
+  \item \textbf{C2 :} chaque format demandé est produit aux dimensions exactes.
+  \item \textbf{C3 :} le copy généré est cohérent avec le brief (cas de test Gefradis).
+  \item \textbf{C4 :} la boucle aperçu, ajustement et régénération fonctionne.
+  \item \textbf{C5 :} le kit se télécharge en \texttt{.zip} et s'ouvre correctement.
+  \item \textbf{C6 (démonstration) :} l'outil produit un kit complet et conforme à
+        la charte sur le cas de test Gefradis.
+\end{itemize}
+
+% =====================================================================
+\section{Annexe : exemple de prompt}
+\label{sec:annexe-prompt}
+% =====================================================================
+\textbf{Prompt système} (fixe, définit le rôle et les contraintes) :
+
+\begin{lstlisting}
+Tu es le directeur artistique de Gefradis (menuiserie PVC sur-mesure).
+Regles STRICTES :
+- Couleurs de fond autorisees : palette de la charte (#253081, #040c4d, #e7e9f4,
+  #f3f4f6, #e4e4e4, #f9fafb, #fffde5) ; accent jaune #FFD52B.
+- Police : Cabin uniquement.
+- Garde le MEME message sur tous les formats.
+- Reponds UNIQUEMENT par un JSON valide, sans aucun HTML ni texte autour.
+Champs : categorie, titre, offre_type (montant/pourcentage/texte), offre_label,
+offre_nombre, offre_suffixe, offre_texte, cta, couleur_fond (palette ci-dessus),
+illustrer (true/false).
+\end{lstlisting}
+
+\textbf{Message utilisateur} (le brief et le format) :
+
+\begin{lstlisting}
+Operation : "Les jours Gros projets = Grosses Remises"
+Mecanique : 500 EUR offerts des 1000 EUR d'achat HT
+Format vise : Meta 1080x1080 (carre)
+\end{lstlisting}
+
+\textbf{Sortie attendue} (JSON seul, sans HTML) :
+
+\begin{lstlisting}
+{
+  "categorie": "transversale",
+  "titre": "Gros projets = Grosses Remises",
+  "offre_type": "montant",
+  "offre_label": "Jusqu'a",
+  "offre_nombre": "500",
+  "offre_suffixe": "EUR",
+  "offre_texte": "",
+  "cta": "J'en profite",
+  "couleur_fond": "#253081",
+  "illustrer": false
+}
+\end{lstlisting}
+
+\vspace{1em}
+\hrule
+\vspace{0.5em}
+{\small\itshape Fin du cahier de conception (version 0.3). Ce document est destiné
+à évoluer selon la réponse du client à la question ouverte et selon les retours
+sur les premières versions. Version 0.3 : ajout des types de bannières, de la
+banque d'images, du montage transversal et de l'offre générique.}
+
+\end{document}

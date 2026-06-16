@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face {
+    font-family: 'Cabin';
+    src: url('../../assets/fonts/Cabin.ttf');
+    font-weight: 100 900;
+  }
+
+  :root {
+    --fond:  {{ couleur_fond }};
+    --texte: {{ couleur_texte }};
+    --jaune: #FFD52B;
+    --bouton: {{ couleur_bouton }};
+    --bouton-texte: {{ couleur_bouton_texte }};
+    --base: {{ base }}px;   /* pour les formats larges, l'échelle suit la hauteur */
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  /* Disposition EN LIGNE : titre à gauche, offre (et bouton) à droite. */
+  .banniere {
+    width:  {{ largeur }}px;
+    height: {{ hauteur }}px;
+    background: var(--fond);
+    font-family: 'Cabin', sans-serif;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: calc(var(--base) * 0.5);
+    padding: 0 calc(var(--base) * 0.5);
+    overflow: hidden;
+  }
+
+  .titre {
+    color: var(--texte);
+    font-weight: 700;       /* Cabin Bold (strict charte) */
+    font-size: calc(var(--base) * 0.30);
+    line-height: 1.05;
+    flex: 1;                /* le titre occupe l'espace de gauche */
+  }
+
+  .offre {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--base) * 0.25);
+    flex-shrink: 0;         /* l'offre garde sa taille, ne se comprime pas */
+  }
+
+  .offre-label {
+    color: var(--texte);
+    font-weight: 700;
+    font-size: calc(var(--base) * 0.22);
+  }
+
+  .prix {
+    background: var(--jaune);
+    color: #000;
+    font-weight: 700;       /* Cabin Bold (strict charte) */
+    padding: calc(var(--base) * 0.06) calc(var(--base) * 0.22);
+    display: inline-flex;
+    align-items: flex-start;
+  }
+  .prix .nombre { font-size: calc(var(--base) * 0.62); line-height: 1; }
+  .prix .cents  { font-size: calc(var(--base) * 0.28); margin-top: calc(var(--base) * 0.06); }
+
+  /* Bouton d'action (affiché seulement si un CTA est demandé) */
+  .cta {
+    background: var(--bouton);
+    color: var(--bouton-texte);
+    font-weight: 700;
+    font-size: calc(var(--base) * 0.26);
+    padding: calc(var(--base) * 0.12) calc(var(--base) * 0.4);
+    border-radius: 999px;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+</style>
+</head>
+<body>
+  <div class="banniere">
+    <div class="titre">{{ titre }}</div>
+    <div class="offre">
+      <span class="offre-label">{{ offre_label }}</span>
+      <span class="prix"><span class="nombre">{{ offre_nombre }}</span><span class="cents">{{ offre_suffixe }}</span></span>
+    </div>
+    {% if cta %}<div class="cta">{{ cta }}</div>{% endif %}
+  </div>
+</body>
+</html>

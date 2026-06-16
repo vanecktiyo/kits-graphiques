@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face {
+    font-family: 'Cabin';
+    src: url('../../assets/fonts/Cabin.ttf');
+    font-weight: 100 900;
+  }
+
+  :root {
+    --fond:  {{ couleur_fond }};
+    --texte: {{ couleur_texte }};
+    --jaune: #FFD52B;
+    --bouton: {{ couleur_bouton }};
+    --bouton-texte: {{ couleur_bouton_texte }};
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  /* Format fin (728x90, 320x50). Le contenu est dessiné à une taille de
+     référence, puis mis à l'échelle par JS (voir generer_kit) pour tenir
+     exactement dans le cadre, sans jamais déborder. */
+  .banniere {
+    width:  {{ largeur }}px;
+    height: {{ hauteur }}px;
+    background: var(--fond);
+    font-family: 'Cabin', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .contenu {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-shrink: 0;         /* garde sa taille naturelle ; le JS gère la mise à l'échelle */
+    transform-origin: center;
+  }
+
+  .titre {
+    color: var(--texte);
+    font-weight: 700;       /* Cabin Bold (strict charte) */
+    font-size: 26px;
+    line-height: 1.05;
+    max-width: 230px;       /* le titre passe sur 2 lignes au lieu de déborder */
+    flex-shrink: 0;
+  }
+
+  .offre { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+  .offre-label { color: var(--texte); font-weight: 700; font-size: 18px; }
+
+  .prix {
+    background: var(--jaune);
+    color: #000;
+    font-weight: 700;       /* Cabin Bold (strict charte) */
+    padding: 6px 14px;
+    display: inline-flex;
+    align-items: flex-start;
+  }
+  .prix .nombre { font-size: 46px; line-height: 1; }
+  .prix .cents  { font-size: 20px; margin-top: 3px; }
+  .offre-texte  { font-size: 26px; line-height: 1.05; }
+
+  .cta {
+    background: var(--bouton);
+    color: var(--bouton-texte);
+    font-weight: 700;
+    font-size: 20px;
+    padding: 10px 22px;
+    border-radius: 999px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+</style>
+</head>
+<body>
+  <div class="banniere">
+    <div class="contenu">
+      <div class="titre">{{ titre }}</div>
+      <div class="offre">
+        <span class="offre-label">{{ offre_label }}</span>
+        <span class="prix">{% include "_prix.html.j2" %}</span>
+      </div>
+      {% if cta %}<div class="cta">{{ cta }}</div>{% endif %}
+    </div>
+  </div>
+</body>
+</html>

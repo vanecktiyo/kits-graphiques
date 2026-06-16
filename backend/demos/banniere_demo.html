@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<style>
+  /* On déclare la police Cabin (fichier local, téléchargé depuis Google Fonts).
+     C'est une "police variable" : une seule fonte couvre toutes les graisses. */
+  @font-face {
+    font-family: 'Cabin';
+    src: url('../../assets/fonts/Cabin.ttf');
+    font-weight: 100 900;
+  }
+
+  /* Les couleurs de la charte Gefradis, définies une fois (jetons de design). */
+  :root {
+    --gef-blue:   #253081;
+    --gef-yellow: #FFD52B;
+    --gef-beige:  #FFFDE5;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  /* La bannière : taille exacte du format visé. */
+  .banniere {
+    width: 1200px;
+    height: 360px;
+    background: var(--gef-beige);   /* fond clair (plus tard : photo d'ambiance) */
+    font-family: 'Cabin', sans-serif;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  /* La carte bleue posée sur le fond. */
+  .carte {
+    background: var(--gef-blue);
+    width: 760px;
+    height: 300px;
+    margin-left: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 28px;
+    padding: 0 50px;
+  }
+
+  .titre {
+    color: #fff;
+    font-weight: 700;       /* Cabin Bold */
+    font-size: 52px;
+    line-height: 1.05;
+  }
+
+  .offre { display: flex; align-items: center; gap: 22px; }
+
+  .a-partir-de {
+    color: #fff;
+    font-weight: 700;
+    font-size: 26px;
+  }
+
+  /* Le bloc jaune avec le chiffre clé en noir. */
+  .prix {
+    background: var(--gef-yellow);
+    color: #000;
+    font-weight: 700;
+    padding: 8px 24px;
+    display: flex;
+    align-items: flex-start;
+  }
+  .prix .nombre { font-size: 88px; line-height: 1; }
+  .prix .cents  { font-size: 32px; margin-top: 8px; }
+</style>
+</head>
+<body>
+  <div class="banniere">
+    <div class="carte">
+      <div class="titre">Les portes sur-mesure</div>
+      <div class="offre">
+        <span class="a-partir-de">à partir de</span>
+        <span class="prix"><span class="nombre">639</span><span class="cents">,85&euro;</span></span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

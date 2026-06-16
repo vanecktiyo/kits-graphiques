@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face {
+    font-family: 'Cabin';
+    src: url('../../assets/fonts/Cabin.ttf');
+    font-weight: 100 900;
+  }
+
+  :root {
+    --fond:  {{ couleur_fond }};
+    --texte: {{ couleur_texte }};
+    --jaune: #FFD52B;
+    --bouton: {{ couleur_bouton }};
+    --bouton-texte: {{ couleur_bouton_texte }};
+    --base: {{ base }}px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  /* Pub illustrée : produit détouré DANS le cadre, à côté du texte. */
+  .banniere {
+    width:  {{ largeur }}px;
+    height: {{ hauteur }}px;
+    background: var(--fond);
+    font-family: 'Cabin', sans-serif;
+    display: flex;
+    flex-direction: {{ sens }};          /* "row" (paysage) ou "column" (carré/portrait) */
+    align-items: center;
+    justify-content: center;
+    gap: calc(var(--base) * 0.5);
+    padding: calc(var(--base) * 0.7);
+    overflow: hidden;
+  }
+
+  .texte {
+    flex: 1.1;
+    display: flex;
+    flex-direction: column;
+    align-items: {{ 'flex-start' if sens == 'row' else 'center' }};
+    text-align: {{ 'left' if sens == 'row' else 'center' }};
+    gap: calc(var(--base) * 0.4);
+  }
+
+  .produit {
+    flex: 1;
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    min-height: 0;
+  }
+  .produit img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+  .titre {
+    color: var(--texte);
+    font-weight: 700;       /* Cabin Bold (strict charte) */
+    font-size: calc(var(--base) * 0.8);
+    line-height: 1.05;
+  }
+
+  .offre { display: flex; align-items: center; gap: calc(var(--base) * 0.25); }
+
+  .offre-label {
+    color: var(--texte);
+    font-weight: 700;
+    font-size: calc(var(--base) * 0.4);
+  }
+
+  .prix {
+    background: var(--jaune);
+    color: #000;
+    font-weight: 700;       /* Cabin Bold (strict charte) */
+    padding: calc(var(--base) * 0.07) calc(var(--base) * 0.28);
+    display: inline-flex;
+    align-items: flex-start;
+  }
+  .prix .nombre { font-size: calc(var(--base) * 0.85); line-height: 1; }
+  .prix .cents  { font-size: calc(var(--base) * 0.38); margin-top: calc(var(--base) * 0.04); }
+  .offre-texte  { font-size: calc(var(--base) * 0.5); line-height: 1.05; }
+
+  .cta {
+    background: var(--bouton);
+    color: var(--bouton-texte);
+    font-weight: 700;
+    font-size: calc(var(--base) * 0.4);
+    padding: calc(var(--base) * 0.2) calc(var(--base) * 0.6);
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+</style>
+</head>
+<body>
+  <div class="banniere">
+    <div class="texte">
+      <div class="titre">{{ titre }}</div>
+      <div class="offre">
+        <span class="offre-label">{{ offre_label }}</span>
+        <span class="prix">{% include "_prix.html.j2" %}</span>
+      </div>
+      {% if cta %}<div class="cta">{{ cta }}</div>{% endif %}
+    </div>
+    <div class="produit"><img src="{{ image_uri }}" alt=""></div>
+  </div>
+</body>
+</html>
