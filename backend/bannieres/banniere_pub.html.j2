@@ -36,6 +36,8 @@
     text-align: center;
   }
 
+  .logo { height: calc(var(--base) * 1.4); width: auto; border-radius: calc(var(--base) * 0.18); }
+
   .titre {
     color: var(--texte);
     font-weight: 700;       /* Cabin Bold (strict charte) */
@@ -75,6 +77,7 @@
 </head>
 <body>
   <div class="banniere">
+    {% if logo_uri %}<img class="logo" src="{{ logo_uri }}" alt="Gefradis">{% endif %}
     <div class="titre">{{ titre }}</div>
     <div class="offre-label">{{ offre_label }}</div>
     <div class="prix">{% include "_prix.html.j2" %}</div>

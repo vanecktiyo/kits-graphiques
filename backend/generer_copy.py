@@ -48,16 +48,10 @@ TON (charte 6).
 Professeur ou mentor : précis, professionnel, clair sans être trop technique.
 Transparence et pédagogie. Pas de superlatifs creux ni de langage agressif.
 
-PALETTE (charte 1) — couleurs de fond autorisées, n'en sors JAMAIS :
-#253081 (St Patricks blue, bleu impactant), #040c4d (Midnight blue, très foncé),
-#e7e9f4 (Ghost white, clair doux), #f3f4f6 (Cultured, clair neutre),
-#e4e4e4 (Platinum, gris clair), #f9fafb (Cultured 2, presque blanc),
-#fffde5 (Beige, clair chaud). L'accent jaune #ffd52b est géré par le gabarit.
-
 TA MISSION.
 À partir du brief créatif (mécanique commerciale, message commercial,
 illustrations souhaitées), rédige le texte d'une bannière (accroche, libellé et
-montant de l'offre) et choisis la couleur de fond.
+montant de l'offre). La couleur de fond est choisie ailleurs (dans le formulaire).
 
 CONTRAINTES.
 - L'accroche (titre) doit être COURTE (3 à 6 mots) : le même message servira sur
@@ -67,16 +61,27 @@ CONTRAINTES.
   "texte" (offre non chiffrée). Pour montant/pourcentage, remplis offre_nombre +
   offre_suffixe (offre_texte vide). Pour texte, remplis offre_texte (court) et
   laisse offre_nombre/offre_suffixe vides.
+- SIGNE des pourcentages : pour une remise en % présentée SEULE (« Jusqu'à 20% »,
+  « -20% », sans verbe), écris offre_nombre avec le « - » (ex. '-20'). N'mets PAS le
+  « - » si le message dit déjà l'économie (« Économisez 20% », « 20% offerts »).
 - Déduis la catégorie visée à partir de l'offre (mécanique/message), parmi :
   Fenêtres, Portes, Volets roulants, Volets battants, Portails, Clôtures,
   Portes de garage, Baies vitrées. Mets "transversale" si l'opération porte sur
   tout le catalogue.
-- Choisis "couleur_fond" dans la PALETTE, selon le style décrit en 1.3
-  (illustrations). Si 1.3 ne précise aucun style, utilise #253081 par défaut.
-- Ne renseigne "cta" (texte du bouton d'action) QUE si le brief (1.3) le demande
-  explicitement (ex. « bouton CTA "J'en profite" »). Sinon, laisse-le vide ("").
-- Mets "illustrer" à true UNIQUEMENT si le brief (1.3) demande d'illustrer avec une
-  image ; sinon false.
+- Renseigne "cta" (texte du bouton d'action) UNIQUEMENT si l'INTENTION du brief
+  (1.3) est d'inclure un bouton incitant à l'action (par exemple « un bouton
+  "J'en profite" », « un appel à l'action », « incite à demander un devis »...).
+  Comprends le SENS, peu importe le mot. Sinon, laisse-le vide ("").
+- Mets "illustrer" à true si l'INTENTION du brief (1.3) est d'inclure une image ou un
+  visuel (ex. « un visuel », « une image de... », « illustré », « visuel promo »...).
+  Comprends le SENS, peu importe le mot. Sinon false. N'affecte que les pubs.
+- Mets "offre_pastille" à true si l'INTENTION du brief (1.3) est de montrer la remise
+  comme un petit badge dans un coin (style page catégorie), au lieu du bloc central.
+  Comprends le SENS quel que soit le vocabulaire (« badge », « -26 % dans le coin »,
+  « encart », « comme la page catégorie »...). Sinon false.
+- "theme_transverse" : UNIQUEMENT si l'opération est transversale ET qu'un thème de
+  la liste fournie (s'il y en a une) correspond au message par le SENS (ex. « Black
+  Friday »), renvoie son nom EXACT tel qu'écrit dans la liste ; sinon "" (vide).
 - Réponds UNIQUEMENT via l'outil fourni."""
 
 # ---------------------------------------------------------------------------
@@ -113,8 +118,12 @@ OUTIL = {
             },
             "offre_nombre": {
                 "type": "string",
-                "description": "Pour montant/pourcentage : le nombre mis en avant, "
-                               "chiffres uniquement (ex : '500', '639', '26'). Sinon vide.",
+                "description": "Le nombre mis en avant. Montant : chiffres seuls "
+                               "(ex : '500', '639'). Pourcentage de remise présenté SEUL "
+                               "(libellé « Jusqu'à », « Remise de », ou sans libellé) : "
+                               "préfixe par '-' (ex : '-20', '-26'). PAS de '-' si le "
+                               "message exprime déjà l'économie (« Économisez 20% », "
+                               "« 20% offerts »). Sinon vide.",
             },
             "offre_suffixe": {
                 "type": "string",
@@ -128,25 +137,32 @@ OUTIL = {
             },
             "cta": {
                 "type": "string",
-                "description": "Texte du bouton d'action, UNIQUEMENT si le brief (1.3) "
-                               "le demande ; sinon chaîne vide.",
-            },
-            "couleur_fond": {
-                "type": "string",
-                "enum": ["#253081", "#040c4d", "#e7e9f4", "#f3f4f6",
-                         "#e4e4e4", "#f9fafb", "#fffde5"],
-                "description": "Couleur de fond choisie dans la palette de la charte, "
-                               "selon le style décrit en 1.3 (#253081 par défaut).",
+                "description": "Texte du bouton d'action, si l'INTENTION du brief (1.3) "
+                               "est d'inclure un bouton (quel que soit le mot) ; sinon vide.",
             },
             "illustrer": {
                 "type": "boolean",
-                "description": "true UNIQUEMENT si le brief (1.3) demande d'illustrer "
-                               "avec une image ; sinon false. N'affecte que les pubs.",
+                "description": "true si le brief (1.3) veut une image / un visuel "
+                               "(comprends le SENS : « un visuel », « une image de... », "
+                               "« illustré », « visuel promo »...) ; sinon false.",
+            },
+            "offre_pastille": {
+                "type": "boolean",
+                "description": "true si l'INTENTION du brief (1.3) est d'afficher la "
+                               "remise comme un petit badge dans un coin (au lieu du "
+                               "bloc central). Déduis-le du sens, peu importe le mot.",
+            },
+            "theme_transverse": {
+                "type": "string",
+                "description": "Pour une opération transversale uniquement : le thème "
+                               "de la liste fournie qui correspond au message (par le "
+                               "sens), écrit EXACTEMENT comme dans la liste ; sinon ''.",
             },
         },
         "required": [
             "categorie", "titre", "offre_type", "offre_label", "offre_nombre",
-            "offre_suffixe", "offre_texte", "cta", "couleur_fond", "illustrer",
+            "offre_suffixe", "offre_texte", "cta", "illustrer",
+            "offre_pastille", "theme_transverse",
         ],
     },
 }
@@ -154,25 +170,32 @@ OUTIL = {
 _client = anthropic.Anthropic()   # lit ANTHROPIC_API_KEY dans l'environnement
 
 
-def _prompt_utilisateur(brief: dict) -> str:
+def _prompt_utilisateur(brief: dict, themes=()) -> str:
     """Met en forme le brief créatif (1.1, 1.2, 1.3) saisi par le marketing."""
-    return (
+    texte = (
         f"1.1 Mécanique commerciale : {brief.get('mecanique', '')}\n"
         f"1.2 Message commercial : {brief.get('message', '')}\n"
         f"1.3 Illustrations souhaitées : "
         f"{brief.get('illustrations') or 'non précisé (charte Gefradis par défaut)'}"
     )
+    if themes:
+        texte += ("\n\nThèmes transverses disponibles (pour 'theme_transverse', "
+                  "si l'opération est transversale) : " + ", ".join(themes) + ".")
+    return texte
 
 
-def generer_copy(brief: dict) -> dict:
-    """Envoie le brief à Claude et renvoie le copy structuré (dict)."""
+def generer_copy(brief: dict, themes=()) -> dict:
+    """Envoie le brief à Claude et renvoie le copy structuré (dict).
+
+    `themes` : noms des thèmes transverses disponibles (sous-dossiers d'images),
+    pour que Claude choisisse le bon visuel d'une opération transversale."""
     reponse = _client.messages.create(
         model=MODELE,
         max_tokens=600,
         system=SYSTEME,
         tools=[OUTIL],
         tool_choice={"type": "tool", "name": "produire_copy"},
-        messages=[{"role": "user", "content": _prompt_utilisateur(brief)}],
+        messages=[{"role": "user", "content": _prompt_utilisateur(brief, themes)}],
     )
     # Avec tool_choice forcé, la réponse contient un bloc "tool_use" : son champ
     # .input EST notre JSON, déjà validé contre le schéma.

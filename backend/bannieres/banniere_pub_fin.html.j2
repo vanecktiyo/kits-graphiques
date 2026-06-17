@@ -40,6 +40,7 @@
     flex-shrink: 0;         /* garde sa taille naturelle ; le JS gère la mise à l'échelle */
     transform-origin: center;
   }
+  .contenu .logo { height: 46px; width: auto; flex-shrink: 0; border-radius: 6px; }
 
   .titre {
     color: var(--texte);
@@ -80,6 +81,7 @@
 <body>
   <div class="banniere">
     <div class="contenu">
+      {% if logo_uri %}<img class="logo" src="{{ logo_uri }}" alt="Gefradis">{% endif %}
       <div class="titre">{{ titre }}</div>
       <div class="offre">
         <span class="offre-label">{{ offre_label }}</span>

@@ -105,7 +105,7 @@
 \begin{flushleft}
 {\sffamily\large
 \textbf{Auteur :} Vaneck \\[0.2cm]
-\textbf{Version :} 0.3 (conception)\\[0.2cm]
+\textbf{Version :} 0.4 (conception)\\[0.2cm]
 \textbf{Date :} \today
 }
 \end{flushleft}
@@ -156,14 +156,15 @@ L'outil suit le principe \textbf{entrée, traitement, sortie}.
 
 \begin{itemize}[leftmargin=1.4em]
   \item \textbf{F1. Saisie du brief :} l'utilisateur décrit la mécanique
-        commerciale (1.1), le message commercial (1.2) et, en option, les
-        illustrations (1.3 : style souhaité et demande éventuelle d'une image).
+        commerciale (1.1), le message commercial (1.2), en option les illustrations
+        (1.3 : style souhaité et demande éventuelle d'une image), et choisit la
+        \textbf{couleur de fond} dans la palette de la charte (menu déroulant).
   \item \textbf{F2. Sélection des formats :} l'utilisateur coche les bannières
         à produire (site, Google Display, Google Pmax, Meta).
   \item \textbf{F3. Génération du texte :} le système transforme le brief en
         contenu structuré (accroche, offre de type montant, pourcentage ou texte,
-        appel à l'action) et déduit la catégorie, la couleur de fond et le besoin
-        d'image.
+        appel à l'action) et déduit la catégorie, le besoin d'image et, pour une
+        opération transversale, le thème (ex. Black Friday).
   \item \textbf{F4. Composition :} selon le \textbf{type} de bannière (bandeau site,
         header, publicité, format fin), le système assemble le texte, les couleurs,
         la police, le logo et, si besoin, l'image de la catégorie (banque d'images),
@@ -196,7 +197,7 @@ L'outil suit le principe \textbf{entrée, traitement, sortie}.
 % =====================================================================
 \section{Catalogue des formats à produire}
 % =====================================================================
-Les dimensions du site sont à confirmer auprès du client ; celles des régies
+Les dimensions du site ont été communiquées par le client ; celles des régies
 publicitaires sont des standards.
 
 \begin{center}\small
@@ -204,8 +205,8 @@ publicitaires sont des standards.
 \toprule
 \textbf{Destination} & \textbf{Élément} & \textbf{Dimensions (px) / type} \\
 \midrule
-Site & Header page d'accueil & Desktop et mobile (à préciser) \\
-Site & Bandeau page catégorie & Desktop et mobile (à préciser) \\
+Site & Header page d'accueil & Desktop 1900x456, Mobile 426x575 \\
+Site & Bandeau page catégorie & 2560x280 (unique, sans version mobile) \\
 Google Display & Pavé / Bannière / Skyscraper / Mobile & 300x250, 728x90, 160x600, 320x50 (statique et animé) \\
 Google Pmax & Visuels statiques & Paysage 1200x628, Carré 1200x1200, Portrait 960x1200 \\
 Meta (FB / Insta) & Carré / Portrait / Story & 1080x1080, 1080x1350, 1080x1920 \\
@@ -240,8 +241,11 @@ Blanc & \texttt{\#FFFFFF} & Texte sur fond bleu \\
         (fichier \texttt{.ttf} embarqué dans le projet via \texttt{@font-face}),
         avec une police sans-serif système en repli. Pas de dépendance à un CDN au
         moment du rendu.
-  \item \textbf{Logo :} deux versions (bleu sur fond clair ; blanc sur fond
-        foncé), à poser selon la couleur du fond.
+  \item \textbf{Logo :} deux variantes (bleu pour fond clair ; badge bleu/jaune pour
+        fond foncé), posées selon la couleur du fond, et \textbf{uniquement sur les
+        bannières publicitaires} (Google, Meta) ; pas de logo sur les bannières site
+        (on est déjà dans l'environnement Gefradis). Les fichiers fournis ayant un
+        fond blanc, une version transparente est générée automatiquement.
   \item \textbf{Ton :} professeur ou mentor, précis, professionnel, clair sans
         être trop technique.
   \item \textbf{Imagerie :} esthétique épurée, minimaliste, « sortie d'usine ».
@@ -417,6 +421,8 @@ l'IA et le moteur.
   \item \texttt{message} (1.2) : nom de l'opération et accroche.
   \item \texttt{illustrations} (1.3) : style graphique souhaité et éventuelle demande
         d'une image (optionnel). À défaut, la charte s'applique.
+  \item \texttt{couleur\_fond} : couleur de fond choisie dans la palette (menu
+        déroulant ; \texttt{\#253081} par défaut).
   \item \texttt{formats} : liste des bannières à produire (cases cochées).
 \end{itemize}
 
@@ -426,16 +432,17 @@ pour le cas de test :
 
 \begin{lstlisting}
 {
-  "categorie":     "transversale",
-  "titre":         "Gros projets = Grosses Remises",
-  "offre_type":    "montant",
-  "offre_label":   "Jusqu'a",
-  "offre_nombre":  "500",
-  "offre_suffixe": "EUR",
-  "offre_texte":   "",
-  "cta":           "J'en profite",
-  "couleur_fond":  "#253081",
-  "illustrer":     false
+  "categorie":        "transversale",
+  "titre":            "Gros projets = Grosses Remises",
+  "offre_type":       "montant",
+  "offre_label":      "Jusqu'a",
+  "offre_nombre":     "500",
+  "offre_suffixe":    "EUR offerts",
+  "offre_texte":      "",
+  "cta":              "J'en profite",
+  "illustrer":        false,
+  "offre_pastille":   false,
+  "theme_transverse": ""
 }
 \end{lstlisting}
 
@@ -446,10 +453,12 @@ d'erreurs de parsing (HTML tronqué, guillemets mal échappés) et le respect st
 des dimensions. Les champs clés : \texttt{categorie} (une des familles produit, ou
 \texttt{transversale}) sert à choisir l'image ; \texttt{offre\_type}
 (\texttt{montant}, \texttt{pourcentage} ou \texttt{texte}) commande le rendu de
-l'offre ; \texttt{couleur\_fond} est choisie dans la palette de la charte selon le
-brief (1.3) ; \texttt{illustrer} indique si une image accompagne les pubs. Le
-\textbf{même message} est conservé sur tous les formats : les gabarits adaptent la
-taille du texte aux petits formats.
+l'offre ; \texttt{illustrer} indique si une image accompagne les pubs ;
+\texttt{offre\_pastille} affiche la remise en badge de coin ;
+\texttt{theme\_transverse} sélectionne le visuel d'une opération transversale (ex.
+Black Friday). La \textbf{couleur de fond} ne vient pas de Claude : elle est choisie
+dans le formulaire. Le \textbf{même message} est conservé sur tous les formats : les
+gabarits adaptent la taille du texte aux petits formats.
 
 % =====================================================================
 \section{Système de design et génération créative}
@@ -465,20 +474,22 @@ sur deux rôles complémentaires.
         \textbf{toute la palette de la charte}, la police Cabin et le logo. Chaque
         rendu est conforme à la charte. C'est le cadre non négociable qui garantit
         le respect de la marque et des dimensions.
-  \item \textbf{L'IA, directrice artistique (la créativité) :} à partir du brief
-        (en particulier le champ \textbf{1.3 illustrations}), Claude rédige le copy
-        et \textbf{choisit la couleur de fond} dans la palette de la charte (champ
-        \texttt{couleur\_fond}). Elle ne génère pas de HTML : c'est le code qui rend.
+  \item \textbf{L'IA, concepteur-rédacteur (la créativité) :} à partir du brief
+        (dont le champ \textbf{1.3 illustrations}), Claude rédige le copy et
+        \textbf{déduit} la catégorie, le type d'offre, le besoin d'image et, pour une
+        opération transversale, le thème. La \textbf{couleur de fond} est choisie par
+        l'utilisateur dans le formulaire (plus prévisible). Claude ne génère pas de
+        HTML : c'est le code qui rend.
 \end{itemize}
 
-Ce choix (l'IA \emph{sélectionne et paramètre}, le code \emph{rend}) est le plus
+Ce choix (l'IA \emph{rédige et paramètre}, le code \emph{rend}) est le plus
 \textbf{fiable} : aucune erreur de HTML généré, des dimensions toujours exactes, la
-charte toujours respectée. La créativité vient du choix des couleurs de la charte et
-de la composition, guidé par le brief.
+charte toujours respectée. La créativité vient du copy et des choix de composition
+(image, pastille, thème), guidés par le brief ; le cadre visuel reste verrouillé.
 
-\textbf{Style par défaut :} si le brief ne précise aucun style (champ 1.3 vide), le
-fond prend le \textbf{bleu St Patricks} \texttt{\#253081}, créant une variante
-purement \textbf{typographique}, très propre.
+\textbf{Style par défaut :} le menu de couleur de fond propose le \textbf{bleu St
+Patricks} \texttt{\#253081} par défaut ; sans image demandée (1.3 vide), on obtient
+une variante purement \textbf{typographique}, très propre.
 
 \subsection{Les types de bannières}
 Chaque format appartient à un \textbf{type} qui détermine sa mise en page (le type
@@ -504,17 +515,22 @@ Les visuels produit sont organisés par catégorie, dans
 \texttt{Bandeau page categorie} (photo d'ambiance, pour le bandeau) et
 \texttt{promo} (produit \textbf{détouré}, fond transparent, pour les pubs). La
 \textbf{catégorie} est déduite de l'offre par Claude ; le code va chercher la bonne
-image. Pour une opération \textbf{transversale} (tout le catalogue), plusieurs
-images de catégories sont assemblées \textbf{côte à côte} (montage) en fond des
-bannières site.
+image. Pour une opération \textbf{transversale} (tout le catalogue), un dossier dédié
+\texttt{assets/produit/transverses/} fournit un fond de bandeau, une \textbf{promo
+par défaut} et un sous-dossier par \textbf{thème} (ex. Black Friday) avec son visuel.
+Claude reçoit la liste des thèmes et choisit, d'après le message, le visuel adapté
+(sinon la promo par défaut).
 
 \subsection{Une offre générique}
 L'outil sert des opérations commerciales variées : l'offre peut être un
 \textbf{montant} (« Jusqu'à 500 € »), un \textbf{pourcentage} (« -26 \% ») ou un
-\textbf{texte} (« Livraison offerte »). Claude renseigne \texttt{offre\_type} et le
-gabarit rend chacun avec le style adapté (gros chiffre, ou texte), toujours dans le
-bloc jaune de la charte. Seul le \textbf{message} (l'accroche) est affiché, jamais
-le détail des paliers de la mécanique, qui reste sur la page de destination.
+\textbf{avantage} en toutes lettres (« Livraison offerte »). Claude renseigne
+\texttt{offre\_type} et le gabarit rend chacun avec le style adapté, toujours dans le
+bloc jaune de la charte. Pour les pourcentages, le signe « - » est ajouté selon le
+\textbf{sens} du message (présent pour « Jusqu'à 20 \% », absent pour « Économisez
+20 \% »). En option (\texttt{offre\_pastille}), la remise s'affiche en \textbf{badge
+de coin} au lieu du bloc central. Seul le \textbf{message} est affiché, jamais le
+détail des paliers de la mécanique, qui reste sur la page de destination.
 
 % =====================================================================
 \section{Parcours utilisateur (UX)}
@@ -592,28 +608,28 @@ L'objectif est un rendu d'outil professionnel et lisible, distinct du style
 % =====================================================================
 \section{Rôle de l'IA et stratégie de prompt}
 % =====================================================================
-\textbf{Ce que fait l'IA (Claude) :} elle joue \textbf{deux rôles}. D'abord celui
-de \emph{concepteur-rédacteur} : elle rédige le copy. Ensuite celui de
-\emph{directeur artistique} : elle \textbf{choisit la variante de mise en page} la
-plus adaptée au brief et au format (champ \texttt{style\_variant}), et peut en
-proposer plusieurs. \textbf{Ce qu'elle ne fait pas :} générer du HTML, ni produire
-une image matricielle. Sa sortie est \textbf{uniquement un JSON} (copy et variante) ;
-c'est le code Python qui injecte ce JSON dans un gabarit fixe, rendu en PNG par
-Playwright. Cela garantit l'absence d'erreur de parsing, des dimensions toujours
-exactes et le respect strict de la charte.
+\textbf{Ce que fait l'IA (Claude) :} elle joue le rôle de \emph{concepteur-rédacteur}.
+Elle rédige le copy et \textbf{déduit} les paramètres structurés (catégorie, type
+d'offre, besoin d'image, thème transversal, pastille). \textbf{Ce qu'elle ne fait
+pas :} choisir la mise en page (le \textbf{type} de bannière se déduit du format),
+choisir la couleur de fond (champ du formulaire), générer du HTML ou une image
+matricielle. Sa sortie est \textbf{uniquement un JSON} ; c'est le code Python qui
+l'injecte dans un gabarit fixe, rendu en PNG par Playwright. Cela garantit l'absence
+d'erreur de parsing, des dimensions toujours exactes et le respect strict de la charte.
 
 \textbf{Stratégie de prompt :} un \emph{prompt système} fixe le rôle et surtout les
-\textbf{contraintes} (« Tu es le directeur artistique de Gefradis. Respecte
-strictement la charte. Réponds uniquement par un JSON valide, sans HTML. »). Le
-\emph{message utilisateur} fournit le brief et le format visé. Un exemple complet de
-prompt figure en annexe (section~\ref{sec:annexe-prompt}).
+\textbf{contraintes} (« Tu es le concepteur-rédacteur de Gefradis. Garde le même
+message sur tous les formats. N'invente aucun chiffre. Réponds uniquement via
+l'outil, en JSON, sans HTML. »). Le \emph{message utilisateur} fournit le brief et la
+liste des thèmes transverses disponibles. Le \textbf{tool use} (schéma d'outil imposé)
+garantit un JSON valide. Un exemple figure en annexe (section~\ref{sec:annexe-prompt}).
 
-\textbf{Choix : pas de génération d'image (GPT ou Imagen).} La charte (page
-« Personnalité de l'imagerie ») demande des photos \emph{réelles} de produits,
-brutes et épurées, et non des images inventées. Les visuels éventuels proviennent
-donc des \textbf{photos réelles} de Gefradis (fond d'ambiance, produits détourés),
-plutôt que d'une génération. L'architecture reste prête à accueillir un module de
-génération d'illustration si le client le souhaite.
+\textbf{Choix : pas de génération d'image au moment du rendu.} La charte demande des
+photos \emph{réelles} de produits, brutes et épurées. Les visuels proviennent donc de
+la \textbf{banque d'assets} de Gefradis (photos d'ambiance, produits détourés, visuels
+d'événements transverses fournis), placés par le code, plutôt que d'une génération à
+la volée. L'architecture reste prête à accueillir un module de génération si le client
+le souhaite (par exemple pour des fonds d'ambiance).
 
 % =====================================================================
 \section{Plan de construction (lotissement)}
@@ -670,15 +686,22 @@ Google Pmax & Tailles standard \\
 Mécanique commerciale & Donnée saisie par l'utilisateur : l'outil est \textbf{générique} \\
 Référence visuelle & Fond bleu, titre blanc et chiffre clé dans un bloc jaune \\
 Interface & Architecture découplée : backend \textbf{FastAPI} et frontend \textbf{HTML/Tailwind} ; UX en base neutre avec accents de marque \\
+Couleur de fond & Choisie par l'utilisateur dans la palette (menu), pas par l'IA : plus prévisible \\
+Logo & Posé sur les bannières publicitaires uniquement ; variante selon la couleur du fond \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-\subsection{Question ouverte (à poser au client)}
-\textbf{Les visuels (section 1.3 de la note) :} les bannières doivent-elles
-intégrer des \emph{photos produit} (fenêtres, portes), ou rester \emph{basées sur
-le texte, les couleurs et le logo} (sans photo) ? Si des visuels sont attendus,
-une banque de \emph{photos détourées} peut-elle être fournie ?
+\subsection{Points clarifiés avec le client}
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{Visuels :} le client fournit une \textbf{banque d'images} par
+        catégorie (issue du flux Google Shopping) et des visuels pour les opérations
+        transverses ; l'outil les place, sans génération.
+  \item \textbf{Dimensions du site :} communiquées (HP 1900x456 et 426x575 ;
+        catégorie 2560x280, sans version mobile).
+  \item \textbf{Logo :} sur les bannières display (Google, Meta), pas sur le site.
+  \item \textbf{Bouton d'action :} détection depuis le brief (1.3) validée par le client.
+\end{itemize}
 
 % =====================================================================
 \section{Risques et limites}
@@ -691,8 +714,8 @@ une banque de \emph{photos détourées} peut-elle être fournie ?
 Complexité des bannières animées & Statique d'abord ; pour l'animé, GIF assemblé avec Pillow ; HTML5 et MP4 en V2 \\
 Compatibilité Playwright et Python récent & Solution de repli (Pillow ou un rendu HTML alternatif) si besoin \\
 Mémoire de Playwright (Chromium) en production & Allouer 2 à 4 Go de RAM sur Cloud Run ; limiter la concurrence des rendus \\
-Assets manquants (logo source, photos) & Logo recadrable depuis la charte ; démarrage possible sans photo (fond uni) \\
-Dimensions du site inconnues & À confirmer auprès du client ; valeurs standard en attendant \\
+Logos fournis avec fond blanc (non transparents) & Détourage automatique mis en cache pour les poser proprement sur tout fond \\
+Image presque carrée sur un bandeau très large (9:1) & Image posée à pleine hauteur et répétée pour remplir, sans rogner le sujet \\
 Coût et qualité du copy IA & Prompt contraint au format JSON, sorties courtes, modèle adapté au besoin \\
 Complexité du frontend (FastAPI et Tailwind) & Frontend volontairement léger (pas de SPA lourde) ; construit progressivement \\
 \bottomrule
@@ -719,16 +742,16 @@ Complexité du frontend (FastAPI et Tailwind) & Frontend volontairement léger (
 \textbf{Prompt système} (fixe, définit le rôle et les contraintes) :
 
 \begin{lstlisting}
-Tu es le directeur artistique de Gefradis (menuiserie PVC sur-mesure).
+Tu es le concepteur-redacteur de Gefradis (menuiserie PVC sur-mesure).
 Regles STRICTES :
-- Couleurs de fond autorisees : palette de la charte (#253081, #040c4d, #e7e9f4,
-  #f3f4f6, #e4e4e4, #f9fafb, #fffde5) ; accent jaune #FFD52B.
-- Police : Cabin uniquement.
-- Garde le MEME message sur tous les formats.
-- Reponds UNIQUEMENT par un JSON valide, sans aucun HTML ni texte autour.
+- Ton : professeur/mentor, precis et clair ; pas de superlatifs creux.
+- Garde le MEME message (court) sur tous les formats.
+- N'invente aucun chiffre : utilise seulement les conditions du brief.
+- Reponds UNIQUEMENT via l'outil (JSON valide), sans HTML.
 Champs : categorie, titre, offre_type (montant/pourcentage/texte), offre_label,
-offre_nombre, offre_suffixe, offre_texte, cta, couleur_fond (palette ci-dessus),
-illustrer (true/false).
+offre_nombre, offre_suffixe, offre_texte, cta, illustrer (bool),
+offre_pastille (bool), theme_transverse.
+La couleur de fond n'est PAS choisie par l'IA : elle vient du formulaire.
 \end{lstlisting}
 
 \textbf{Message utilisateur} (le brief et le format) :
@@ -748,20 +771,22 @@ Format vise : Meta 1080x1080 (carre)
   "offre_type": "montant",
   "offre_label": "Jusqu'a",
   "offre_nombre": "500",
-  "offre_suffixe": "EUR",
+  "offre_suffixe": "EUR offerts",
   "offre_texte": "",
   "cta": "J'en profite",
-  "couleur_fond": "#253081",
-  "illustrer": false
+  "illustrer": false,
+  "offre_pastille": false,
+  "theme_transverse": ""
 }
 \end{lstlisting}
 
 \vspace{1em}
 \hrule
 \vspace{0.5em}
-{\small\itshape Fin du cahier de conception (version 0.3). Ce document est destiné
-à évoluer selon la réponse du client à la question ouverte et selon les retours
-sur les premières versions. Version 0.3 : ajout des types de bannières, de la
-banque d'images, du montage transversal et de l'offre générique.}
+{\small\itshape Fin du cahier de conception (version 0.4). Version 0.4 : dimensions
+du site confirmées ; couleur de fond choisie au formulaire (et non par l'IA) ; logo
+sur les pubs selon le fond (détourage automatique) ; banque d'images transverses par
+thème (ex. Black Friday) avec promo par défaut ; pastille de remise ; signe des
+pourcentages géré selon le sens du message.}
 
 \end{document}

@@ -29,7 +29,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from generer_copy import generer_copy
-from generer_kit import FORMATS, SORTIE, generer_kit
+from generer_kit import FORMATS, SORTIE, generer_kit, themes_transverses
 
 RACINE = Path(__file__).resolve().parent.parent   # racine du projet
 
@@ -62,12 +62,23 @@ def _formats_choisis(noms):
     return choisis or FORMATS
 
 
-def _resultat(request, brief, copy, formats_choisis):
-    """Construit la page de résultat (copy éditable + aperçus)."""
-    images = [
-        {"nom": nom, "largeur": l, "hauteur": h, "fichier": f"{nom}.png"}
-        for nom, l, h in formats_choisis
-    ]
+def _resultat(request, brief, copy, formats_choisis, display_versions=("statique", "anime")):
+    """Construit la page de résultat (copy éditable + aperçus).
+
+    Pour un format Display, on affiche séparément la version statique (PNG) et la
+    version animée (GIF), selon les versions demandées."""
+    images = []
+    for nom, l, h in formats_choisis:
+        if nom.startswith("display_"):
+            if "statique" in display_versions:
+                images.append({"nom": nom, "largeur": l, "hauteur": h,
+                               "fichier": f"{nom}.png", "variante": "statique"})
+            if "anime" in display_versions:
+                images.append({"nom": nom, "largeur": l, "hauteur": h,
+                               "fichier": f"{nom}.gif", "variante": "animé"})
+        else:
+            images.append({"nom": nom, "largeur": l, "hauteur": h,
+                           "fichier": f"{nom}.png", "variante": None})
     return templates.TemplateResponse(
         request=request,
         name="interface.html",
@@ -77,6 +88,7 @@ def _resultat(request, brief, copy, formats_choisis):
             "copy": copy,
             "images": images,
             "noms_choisis": [f[0] for f in formats_choisis],
+            "display_versions": list(display_versions),
             "cache": int(time.time()),   # anti-cache pour rafraîchir les images
         },
     )
@@ -97,13 +109,18 @@ def generer(
     mecanique: str = Form(""),
     message: str = Form(...),
     illustrations: str = Form(""),
+    couleur_fond: str = Form("#253081"),    # fond choisi dans le formulaire
     formats: list[str] = Form(default=[]),
+    display_versions: list[str] = Form(default=["statique", "anime"]),  # display : statique / animé
 ):
     brief = {"mecanique": mecanique, "message": message, "illustrations": illustrations}
-    copy = generer_copy(brief)              # Claude rédige le texte (JSON)
+    copy = generer_copy(brief, themes=themes_transverses())   # texte + choix du thème
+    copy["couleur_fond"] = couleur_fond     # le fond ne vient pas de Claude
     choisis = _formats_choisis(formats)
-    generer_kit(copy, formats=choisis)      # Playwright rend les PNG
-    return _resultat(request, brief, copy, choisis)
+    generer_kit(copy, formats=choisis,
+                display_statique="statique" in display_versions,
+                display_anime="anime" in display_versions)
+    return _resultat(request, brief, copy, choisis, display_versions)
 
 
 @app.post("/ajuster", response_class=HTMLResponse)
@@ -115,7 +132,9 @@ def ajuster(
     categorie: str = Form("transversale"),   # catégorie déduite, transmise du résultat
     couleur_fond: str = Form("#253081"),     # couleur de fond, transmise du résultat
     illustrer: str = Form(""),               # "1" si une image est voulue (transmis)
+    offre_pastille: str = Form(""),          # "1" si remise en pastille de coin (transmis)
     offre_type: str = Form("montant"),       # montant / pourcentage / texte (transmis)
+    theme_transverse: str = Form(""),        # thème transverse choisi par Claude (transmis)
     titre: str = Form(...),
     offre_label: str = Form(""),
     offre_nombre: str = Form(""),
@@ -123,16 +142,20 @@ def ajuster(
     offre_texte: str = Form(""),
     cta: str = Form(""),
     formats: list[str] = Form(default=[]),
+    display_versions: list[str] = Form(default=["statique", "anime"]),
 ):
     # On ne rappelle PAS Claude : on re-rend à partir du texte modifié à la main.
     copy = {"categorie": categorie, "titre": titre, "offre_type": offre_type,
             "offre_label": offre_label, "offre_nombre": offre_nombre,
             "offre_suffixe": offre_suffixe, "offre_texte": offre_texte,
-            "cta": cta, "couleur_fond": couleur_fond, "illustrer": bool(illustrer)}
+            "cta": cta, "couleur_fond": couleur_fond, "illustrer": bool(illustrer),
+            "offre_pastille": bool(offre_pastille), "theme_transverse": theme_transverse}
     brief = {"mecanique": mecanique, "message": message, "illustrations": illustrations}
     choisis = _formats_choisis(formats)
-    generer_kit(copy, formats=choisis)
-    return _resultat(request, brief, copy, choisis)
+    generer_kit(copy, formats=choisis,
+                display_statique="statique" in display_versions,
+                display_anime="anime" in display_versions)
+    return _resultat(request, brief, copy, choisis, display_versions)
 
 
 @app.get("/telecharger")
@@ -140,8 +163,8 @@ def telecharger():
     """Zippe le contenu de output/kit et le renvoie en téléchargement."""
     buffer = io.BytesIO()
     with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as zf:
-        for png in sorted(SORTIE.glob("*.png")):
-            zf.write(png, arcname=png.name)
+        for f in sorted(list(SORTIE.glob("*.png")) + list(SORTIE.glob("*.gif"))):
+            zf.write(f, arcname=f.name)
     buffer.seek(0)
     return Response(
         content=buffer.getvalue(),

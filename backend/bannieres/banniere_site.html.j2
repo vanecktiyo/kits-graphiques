@@ -24,7 +24,9 @@
     width:  {{ largeur }}px;
     height: {{ hauteur }}px;
     {% if image_uri and not montage_images %}
-    background: var(--bleu) url('{{ image_uri }}') center / cover no-repeat;
+    {# image adaptée à la hauteur du bandeau (pleine hauteur), puis répétée pour
+       remplir toute la largeur ; le sujet est entièrement visible. #}
+    background: var(--bleu) url('{{ image_uri }}') center / auto 100% repeat-x;
     {% else %}
     background: var(--bleu);
     {% endif %}
@@ -32,6 +34,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: calc(var(--base) * 0.8);
     overflow: hidden;
   }
 
@@ -62,6 +65,17 @@
     gap: calc(var(--base) * 0.55);
     text-align: center;
     max-width: 82%;
+  }
+
+  /* Visuel d'événement transverse (ex. Black Friday) posé à côté de la carte.
+     Hauteur en % du bandeau : le visuel s'adapte à la taille de la bannière. */
+  .evenement {
+    position: relative;
+    z-index: 1;
+    height: 70%;
+    width: auto;
+    max-width: 30%;
+    object-fit: contain;
   }
 
   .titre {
@@ -114,6 +128,7 @@
       {% for img in montage_images %}<div class="cell" style="background-image: url('{{ img }}')"></div>{% endfor %}
     </div>
     {% endif %}
+    {% if evenement_uri %}<img class="evenement" src="{{ evenement_uri }}" alt="">{% endif %}
     <div class="carte">
       <div class="titre">{{ titre }}</div>
       <div class="offre">

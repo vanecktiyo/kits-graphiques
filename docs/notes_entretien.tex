@@ -316,4 +316,189 @@ garantit la charte, les dimensions exactes et la cohérence du kit. Si je laissa
 l'IA générer le HTML, je perdrais ces garanties pour rien : la généricité dont j'ai
 besoin est dans le contenu, pas dans la liberté visuelle. »}
 
+% =====================================================================
+\section{Plan de tests (couverture des cas)}
+% =====================================================================
+
+Pour valider l'outil de bout en bout, neuf briefs longs et réalistes couvrent les
+trois types d'offre (montant, pourcentage, avantage) et tous les cas : opération
+catégorie ou transverse, avec ou sans image, avec ou sans bouton, remise en
+pastille, thème Black Friday, repli sur la promo par défaut, fonds clairs ou foncés
+(pour vérifier la variante de logo). Mode d'emploi : saisir 1.1/1.2/1.3, choisir le
+fond, cocher tous les formats, générer, puis comparer au résultat attendu.
+
+\subsection{Type montant (€)}
+
+\textbf{M1 \textbullet{} Portes, catégorie, image et bouton, fond clair}
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{1.1} Opération sur la gamme de portes d'entrée PVC sur-mesure. Prix
+        de lancement à partir de 639,85~€ la porte, pose non comprise, valable avant
+        la fin du mois dans la limite des coloris disponibles.
+  \item \textbf{1.2} Mettre en avant nos portes d'entrée sur-mesure fabriquées en
+        France, au prix d'usine, et donner envie de découvrir la gamme.
+  \item \textbf{1.3} Un visuel qui montre nos portes, et un bouton qui invite à
+        découvrir la collection.
+  \item \textbf{Fond} Blanc bleuté (\#E7E9F4).
+  \item \textbf{Attendu} Catégorie Portes, type montant, image de portes (pubs et
+        header), bouton rempli, pas de pastille, logo bleu, bandeau d'ambiance portes.
+\end{itemize}
+
+\textbf{M2 \textbullet{} Transverse Black Friday, avec image, fond foncé}
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{1.1} Opération Black Friday sur tout le catalogue. Remise progressive
+        selon le montant : 100~€ offerts dès 1000~€ d'achat HT, jusqu'à 500~€ offerts.
+        Valable une semaine seulement.
+  \item \textbf{1.2} Grande opération Black Friday : message fort et événementiel sur
+        des remises exceptionnelles valables sur toute la gamme, avec une notion d'urgence.
+  \item \textbf{1.3} Un visuel marquant aux couleurs de l'opération.
+  \item \textbf{Fond} Bleu nuit (\#040C4D).
+  \item \textbf{Attendu} Catégorie transversale, thème « black friday », type montant,
+        visuel BLACK FRIDAY dans les pubs et à côté de la carte sur le bandeau, fond
+        de bandeau \texttt{bandeau.png}, logo bleu-jaune.
+\end{itemize}
+
+\textbf{M3 \textbullet{} Fenêtres, sans image, sans bouton, sobre, fond clair}
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{1.1} Offre spéciale rénovation sur les fenêtres PVC double vitrage.
+        100~€ offerts par fenêtre dès trois fenêtres commandées, cumulables sur la commande.
+  \item \textbf{1.2} Encourager la rénovation complète en récompensant les commandes
+        multiples, ton pédagogique valorisant l'isolation et les économies d'énergie.
+  \item \textbf{1.3} Rester sobre et élégant, sans image, juste le message et l'offre.
+  \item \textbf{Fond} Gris clair (\#F3F4F6).
+  \item \textbf{Attendu} Catégorie Fenêtres, type montant, pubs typographiques (pas
+        d'image), pas de bouton, pas de pastille ; le bandeau garde sa photo d'ambiance.
+\end{itemize}
+
+\subsection{Type pourcentage (\%)}
+
+\textbf{P1 \textbullet{} Fenêtres, pastille dans le coin, avec image, fond clair}
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{1.1} Déstockage de fin de série sur une sélection de fenêtres PVC.
+        Remise immédiate de -30~\% sur les coloris standard, dans la limite des stocks.
+  \item \textbf{1.2} Communication promo dynamique et lisible, mettant clairement en
+        avant le pourcentage pour déclencher l'achat.
+  \item \textbf{1.3} Une image de fenêtres, et la remise affichée comme un petit badge
+        dans un coin, comme sur la page catégorie.
+  \item \textbf{Fond} Blanc bleuté (\#E7E9F4).
+  \item \textbf{Attendu} Catégorie Fenêtres, type pourcentage, image, pastille de
+        remise dans le coin (au lieu du bloc central).
+\end{itemize}
+
+\textbf{P2 \textbullet{} Transverse French Days (thème inconnu), avec image, fond foncé}
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{1.1} Opération French Days sur tout le catalogue. Remise unique de
+        -20~\% sur l'ensemble des menuiseries PVC, sans minimum d'achat.
+  \item \textbf{1.2} Surfer sur l'événement French Days, valoriser la fabrication
+        française, remise claire sur toute la gamme.
+  \item \textbf{1.3} Un visuel promo générique aux couleurs de la marque.
+  \item \textbf{Fond} Bleu Gefradis (\#253081).
+  \item \textbf{Attendu} Catégorie transversale, thème vide (French Days n'existe pas
+        dans le dossier), repli sur \texttt{promo par défaut} dans les pubs, type
+        pourcentage, bandeau \texttt{bandeau.png} sans visuel d'événement, logo bleu-jaune.
+\end{itemize}
+
+\textbf{P3 \textbullet{} Volets roulants, sans image, avec bouton, fond clair}
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{1.1} Offre saisonnière sur les volets roulants PVC motorisés. -25~\%
+        sur la motorisation pour toute commande de volets roulants neufs, hors pose.
+  \item \textbf{1.2} Promouvoir le confort et les économies d'énergie, message
+        incitatif vers un devis.
+  \item \textbf{1.3} Pas d'image, mais ajouter un bouton pour demander un devis gratuit.
+  \item \textbf{Fond} Gris clair (\#F3F4F6).
+  \item \textbf{Attendu} Catégorie Volets roulants, type pourcentage, pubs
+        typographiques, bouton vers un devis, pas de pastille.
+\end{itemize}
+
+\subsection{Type avantage (non chiffré)}
+
+\textbf{A1 \textbullet{} Baies vitrées, avec image et bouton, fond clair}
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{1.1} Opération sur les baies vitrées coulissantes PVC sur-mesure. La
+        pose est offerte pour toute commande d'une baie, sur rendez-vous.
+  \item \textbf{1.2} Lever le frein de la pose en mettant en avant la pose offerte,
+        valoriser la luminosité et le confort.
+  \item \textbf{1.3} Un visuel de baie vitrée et un bouton pour prendre rendez-vous.
+  \item \textbf{Fond} Blanc bleuté (\#E7E9F4).
+  \item \textbf{Attendu} Catégorie Baies vitrées, type avantage (le bloc jaune affiche
+        « Pose offerte », sans chiffre), image, bouton rempli.
+\end{itemize}
+
+\textbf{A2 \textbullet{} Transverse, livraison offerte, sans image, fond foncé}
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{1.1} Avantage permanent sur tout le catalogue : livraison offerte
+        partout en France métropolitaine dès 1000~€ d'achat.
+  \item \textbf{1.2} Rassurer sur la livraison, renforcer l'argument du prix d'usine
+        sans intermédiaire, ton clair et professionnel.
+  \item \textbf{1.3} Rester épuré, sans image.
+  \item \textbf{Fond} Bleu nuit (\#040C4D).
+  \item \textbf{Attendu} Catégorie transversale, thème vide, type avantage
+        (« Livraison offerte »), pubs typographiques sans aucune image, bandeau
+        \texttt{bandeau.png} + carte, logo bleu-jaune.
+\end{itemize}
+
+\textbf{A3 \textbullet{} Portails, motorisation offerte, avec image et bouton, fond clair}
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{1.1} Opération sur les portails PVC et aluminium sur-mesure. Pour toute
+        commande d'un portail, la motorisation est offerte (valeur jusqu'à 600~€).
+  \item \textbf{1.2} Valoriser le confort de la motorisation et le sur-mesure, avec la
+        motorisation offerte comme argument fort.
+  \item \textbf{1.3} Un visuel de portail et un bouton pour configurer son portail.
+  \item \textbf{Fond} Gris clair (\#F3F4F6).
+  \item \textbf{Attendu} Catégorie Portails, type avantage (« Motorisation offerte »),
+        image de portail, bouton rempli.
+\end{itemize}
+
+\phrasea{« J'ai construit un plan de tests qui couvre méthodiquement tous les cas :
+les trois types d'offre, les opérations catégorie et transverse, la présence ou non
+d'image, de bouton, de pastille, le thème Black Friday et le repli par défaut, ainsi
+que les fonds clairs et foncés pour la variante de logo. Tester, c'est aussi du
+travail d'ingénieur. »}
+
+% =====================================================================
+\section{Résultats des tests}
+% =====================================================================
+
+Les neuf briefs du plan ont été exécutés sur l'ensemble des formats. Après une série
+de corrections, tous les rendus sont conformes aux résultats attendus. La campagne a
+surtout permis de \textbf{détecter et corriger plusieurs anomalies}, ce qui illustre
+une vraie démarche de test.
+
+\subsection{Bilan}
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{Couvert et validé :} déduction de la catégorie, du type d'offre
+        (montant / pourcentage / avantage), du besoin d'image et du thème transverse
+        (Black Friday) ; pastille de remise ; bouton détecté depuis le 1.3 ; logo
+        selon le fond ; bandeaux catégorie et transverse.
+  \item \textbf{Repli par défaut :} une opération transverse sans thème connu
+        (French Days) utilise bien la \emph{promo par défaut}.
+\end{itemize}
+
+\subsection{Anomalies détectées et corrigées}
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{Logo qui chevauchait le titre} (formats portrait illustrés) : en mode
+        colonne, le logo en position absolue passait sur le titre. \emph{Correctif :}
+        en colonne, le logo est placé dans le flux, au-dessus du titre.
+  \item \textbf{Header mobile (426x575) déformé} : l'offre débordait, la taille de base
+        étant calculée sur la hauteur. \emph{Correctif :} base sur la plus petite
+        dimension, et l'offre passe à la ligne si besoin.
+  \item \textbf{Image du bandeau coupée} : le \texttt{cover} rognait l'image sur une
+        bande très large. \emph{Correctif :} image posée à pleine hauteur puis répétée
+        pour remplir (catégorie et transverse).
+  \item \textbf{Anciens fichiers dans le zip} : le dossier de sortie accumulait les
+        formats des générations précédentes. \emph{Correctif :} il est vidé avant
+        chaque génération.
+  \item \textbf{Promo par défaut absente (P2)} : sur une transverse sans thème, l'IA
+        mettait parfois \texttt{illustrer} à \texttt{false}. \emph{Correctif :}
+        détection de l'illustration renforcée (par le sens : « un visuel », « une image »).
+  \item \textbf{Signe des pourcentages} : « 20\% » s'affichait sans le « - ».
+        \emph{Correctif :} le « - » est ajouté selon le sens (présent pour « Jusqu'à
+        20\% », absent pour « Économisez 20\% »).
+\end{itemize}
+
+\phrasea{« J'ai mené une campagne de tests structurée : neuf briefs couvrant les trois
+types d'offre et tous les formats. Elle a révélé des anomalies concrètes (chevauchement
+du logo, débordement sur mobile, image de bandeau rognée, signe des remises...) que j'ai
+corrigées une à une. C'est cette boucle test, diagnostic, correction qui donne confiance
+dans le rendu final. »}
+
 \end{document}

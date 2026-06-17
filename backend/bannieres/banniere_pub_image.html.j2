@@ -22,6 +22,7 @@
 
   /* Pub illustrée : produit détouré DANS le cadre, à côté du texte. */
   .banniere {
+    position: relative;                  /* pour la pastille en coin */
     width:  {{ largeur }}px;
     height: {{ hauteur }}px;
     background: var(--fond);
@@ -91,19 +92,50 @@
     border-radius: 999px;
     white-space: nowrap;
   }
+
+  /* Logo en haut à gauche (bannières display). */
+  .logo {
+    position: absolute;
+    top: calc(var(--base) * 0.5);
+    left: calc(var(--base) * 0.5);
+    height: calc(var(--base) * 1.1);
+    width: auto;
+    border-radius: calc(var(--base) * 0.15);
+  }
+  /* En colonne, le logo passe dans le flux (au-dessus du titre) : pas de chevauchement. */
+  .texte .logo { position: static; margin: 0 auto calc(var(--base) * 0.25); }
+
+  /* Remise en pastille dans le coin (style page catégorie), si demandé en 1.3. */
+  .pastille {
+    position: absolute;
+    bottom: calc(var(--base) * 0.3);
+    right: calc(var(--base) * 0.3);
+    background: var(--jaune);
+    color: #000;
+    font-weight: 700;
+    font-size: calc(var(--base) * 0.7);
+    line-height: 1;
+    padding: calc(var(--base) * 0.18) calc(var(--base) * 0.42);
+    border-radius: calc(var(--base) * 0.12);
+  }
 </style>
 </head>
 <body>
   <div class="banniere">
+    {% if logo_uri and sens == 'row' %}<img class="logo" src="{{ logo_uri }}" alt="Gefradis">{% endif %}
     <div class="texte">
+      {% if logo_uri and sens != 'row' %}<img class="logo" src="{{ logo_uri }}" alt="Gefradis">{% endif %}
       <div class="titre">{{ titre }}</div>
+      {% if not offre_pastille %}
       <div class="offre">
         <span class="offre-label">{{ offre_label }}</span>
         <span class="prix">{% include "_prix.html.j2" %}</span>
       </div>
+      {% endif %}
       {% if cta %}<div class="cta">{{ cta }}</div>{% endif %}
     </div>
     <div class="produit"><img src="{{ image_uri }}" alt=""></div>
+    {% if offre_pastille %}<div class="pastille">{{ offre_nombre }}{{ offre_suffixe }}</div>{% endif %}
   </div>
 </body>
 </html>

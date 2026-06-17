@@ -15,6 +15,10 @@ output/
 # Dépendances front éventuelles (si build Tailwind/Node un jour)
 node_modules/
 
+# Copies de travail pour l'expérimentation d'architectures — hors GitHub
+composable/
+libre/
+
 # Fichiers temporaires LaTeX (on ne versionne que le .tex et le .pdf)
 *.aux
 *.log

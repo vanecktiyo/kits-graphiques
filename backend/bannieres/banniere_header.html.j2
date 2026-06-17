@@ -59,7 +59,12 @@
     line-height: 1.02;
   }
 
-  .offre { display: flex; align-items: center; gap: calc(var(--base) * 0.3); }
+  .offre {
+    display: flex; flex-wrap: wrap; align-items: center;
+    justify-content: {{ 'flex-start' if sens == 'row' else 'center' }};
+    max-width: 100%;
+    gap: calc(var(--base) * 0.3);
+  }
   .offre-label { color: var(--texte); font-weight: 700; font-size: calc(var(--base) * 0.42); }
 
   .prix {
