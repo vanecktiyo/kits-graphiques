@@ -79,6 +79,17 @@
   .prix .cents  { font-size: calc(var(--base) * 0.42); margin-top: calc(var(--base) * 0.04); }
   .offre-texte  { font-size: calc(var(--base) * 0.55); line-height: 1.05; }
 
+  /* Paliers de remise (grands formats) + date de validité */
+  .paliers { display: flex; flex-wrap: wrap; gap: calc(var(--base) * 0.3); max-width: 100%;
+             justify-content: {{ 'flex-start' if sens == 'row' else 'center' }}; }
+  .palier {
+    background: var(--jaune); color: #000; display: flex; flex-direction: column;
+    align-items: flex-start; padding: calc(var(--base) * 0.15) calc(var(--base) * 0.35); line-height: 1.05;
+  }
+  .palier-cond { font-weight: 700; font-size: calc(var(--base) * 0.32); }
+  .palier-val  { font-weight: 700; font-size: calc(var(--base) * 0.72); }
+  .date-validite { color: var(--texte); font-weight: 700; font-size: calc(var(--base) * 0.4); }
+
   .cta {
     background: var(--bouton);
     color: var(--bouton-texte);
@@ -95,22 +106,32 @@
   {% if image_uri and sens == 'row' %}
     <div class="bloc bloc-texte">
       <div class="titre">{{ titre }}</div>
+      {% if date_validite %}<div class="date-validite">{{ date_validite }}</div>{% endif %}
+      {% if montrer_paliers and paliers %}
+      {% include "_paliers.html.j2" %}
+      {% else %}
       <div class="offre">
         <span class="offre-label">{{ offre_label }}</span>
         <span class="prix">{% include "_prix.html.j2" %}</span>
       </div>
+      {% endif %}
       {% if cta %}<div class="cta">{{ cta }}</div>{% endif %}
     </div>
     <div class="bloc bloc-image"><img src="{{ image_uri }}" alt=""></div>
   {% else %}
     <div class="bloc bloc-titre">
       <div class="titre">{{ titre }}</div>
+      {% if date_validite %}<div class="date-validite">{{ date_validite }}</div>{% endif %}
     </div>
     <div class="bloc bloc-offre">
+      {% if montrer_paliers and paliers %}
+      {% include "_paliers.html.j2" %}
+      {% else %}
       <div class="offre">
         <span class="offre-label">{{ offre_label }}</span>
         <span class="prix">{% include "_prix.html.j2" %}</span>
       </div>
+      {% endif %}
       {% if cta %}<div class="cta">{{ cta }}</div>{% endif %}
     </div>
   {% endif %}

@@ -1,0 +1,10 @@
+{# Étiquettes de paliers de remise (grands formats), cf. visuel French Days :
+   chaque palier = une condition (seuil) + sa valeur (avantage), dans un bloc jaune. #}
+<div class="paliers">
+  {% for p in paliers %}
+  <div class="palier">
+    <span class="palier-cond">{{ p.condition }}</span>
+    <span class="palier-val">{{ p.valeur }}</span>
+  </div>
+  {% endfor %}
+</div>

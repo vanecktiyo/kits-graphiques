@@ -37,6 +37,7 @@ app = FastAPI(title="Gefradis - Generateur de bannieres")
 templates = Jinja2Templates(directory=str(RACINE / "frontend" / "templates"))
 app.mount("/output", StaticFiles(directory=str(RACINE / "output")), name="output")
 app.mount("/static", StaticFiles(directory=str(RACINE / "frontend" / "static")), name="static")
+app.mount("/assets", StaticFiles(directory=str(RACINE / "assets")), name="assets")   # logo, etc.
 
 
 def _filtre(prefixe):
@@ -109,6 +110,8 @@ def generer(
     mecanique: str = Form(""),
     message: str = Form(...),
     illustrations: str = Form(""),
+    illustrer: str = Form("1"),             # "1" = ajouter une image produit (choix du formulaire)
+    cta: str = Form(""),                    # texte du bouton (vide = pas de bouton) ; choix du formulaire
     couleur_fond: str = Form("#253081"),    # fond choisi dans le formulaire
     formats: list[str] = Form(default=[]),
     display_versions: list[str] = Form(default=["statique", "anime"]),  # display : statique / animé
@@ -116,6 +119,8 @@ def generer(
     brief = {"mecanique": mecanique, "message": message, "illustrations": illustrations}
     copy = generer_copy(brief, themes=themes_transverses())   # texte + choix du thème
     copy["couleur_fond"] = couleur_fond     # le fond ne vient pas de Claude
+    copy["illustrer"] = bool(illustrer)     # l'image vient du formulaire, plus de Claude
+    copy["cta"] = cta                       # le bouton vient du formulaire, plus de Claude
     choisis = _formats_choisis(formats)
     generer_kit(copy, formats=choisis,
                 display_statique="statique" in display_versions,
@@ -132,9 +137,11 @@ def ajuster(
     categorie: str = Form("transversale"),   # catégorie déduite, transmise du résultat
     couleur_fond: str = Form("#253081"),     # couleur de fond, transmise du résultat
     illustrer: str = Form(""),               # "1" si une image est voulue (transmis)
-    offre_pastille: str = Form(""),          # "1" si remise en pastille de coin (transmis)
     offre_type: str = Form("montant"),       # montant / pourcentage / texte (transmis)
     theme_transverse: str = Form(""),        # thème transverse choisi par Claude (transmis)
+    date_validite: str = Form(""),           # date de validité (éditable)
+    palier_condition: list[str] = Form(default=[]),  # paliers : seuils (éditables)
+    palier_valeur: list[str] = Form(default=[]),     # paliers : valeurs (éditables)
     titre: str = Form(...),
     offre_label: str = Form(""),
     offre_nombre: str = Form(""),
@@ -145,11 +152,15 @@ def ajuster(
     display_versions: list[str] = Form(default=["statique", "anime"]),
 ):
     # On ne rappelle PAS Claude : on re-rend à partir du texte modifié à la main.
+    paliers = [{"condition": c.strip(), "valeur": v.strip()}
+               for c, v in zip(palier_condition, palier_valeur)
+               if c.strip() and v.strip()]
     copy = {"categorie": categorie, "titre": titre, "offre_type": offre_type,
             "offre_label": offre_label, "offre_nombre": offre_nombre,
             "offre_suffixe": offre_suffixe, "offre_texte": offre_texte,
             "cta": cta, "couleur_fond": couleur_fond, "illustrer": bool(illustrer),
-            "offre_pastille": bool(offre_pastille), "theme_transverse": theme_transverse}
+            "theme_transverse": theme_transverse,
+            "paliers": paliers, "date_validite": date_validite}
     brief = {"mecanique": mecanique, "message": message, "illustrations": illustrations}
     choisis = _formats_choisis(formats)
     generer_kit(copy, formats=choisis,

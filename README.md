@@ -13,15 +13,15 @@ Permettre au marketing de produire, en quelques clics et **à la charte Gefradis
 l'ensemble des bannières d'une promotion (site web + publicité Google & Meta),
 prêtes à déployer.
 
-## ✨ Fonctionnalités (cible)
+## ✨ Fonctionnalités
 
 - 📝 Saisie d'un **brief** : mécanique de remise, message commercial, formats souhaités
 - 🤖 Génération du **texte** des bannières par IA (Claude)
 - 🎨 **Composition** à la charte (couleurs, police Cabin, logo) aux **dimensions exactes**
 - 👀 **Aperçu**, **ajustement** et **régénération** avant export
 - 📦 Téléchargement du **kit complet** en `.zip`
-- 🖼️ Formats : site (Header HP, bandeau catégorie — desktop/mobile), Google Display,
-  Google Pmax, Meta — **statique & animé**
+- 🖼️ Formats : site (Header HP desktop/mobile, bandeau catégorie), **Google Display**
+  (statique & animé), Google Pmax, Meta
 
 ## 🏗️ Architecture & stack
 
@@ -94,5 +94,8 @@ entretient_dev_ia/
 
 ## 📌 Statut
 
-🚧 **En cours** — phase de **conception terminée** (cf. [`docs/conception.pdf`](docs/conception.pdf)) ;
-implémentation par couches : statique → tous les formats → IA → interface → animations.
+✅ **Fonctionnel de bout en bout** : saisie du brief → génération du texte (Claude) →
+composition à la charte → aperçu → ajustement → téléchargement du kit `.zip`. Tous les
+formats sont produits, en versions **statique** (PNG) et **animée** (GIF, pour le Display).
+Conception détaillée : [`docs/conception.pdf`](docs/conception.pdf). Le déploiement
+Cloud Run est prévu en évolution.

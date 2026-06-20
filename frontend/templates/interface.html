@@ -3,19 +3,30 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Générateur de bannières · Gefradis</title>
+  <title>Générateur de kits graphiques · Gefradis</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cabin:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --bleu:#253081; --nuit:#040C4D; --jaune:#FFD52B; }
+    body { font-family:'Cabin', ui-sans-serif, system-ui, sans-serif; }
+    .champ { width:100%; border:1px solid #cbd5e1; border-radius:.5rem; padding:.55rem .75rem; background:#fff; }
+    .champ:focus { outline:none; border-color:var(--bleu); box-shadow:0 0 0 3px rgba(37,48,129,.2); }
+    .etape { display:inline-flex; align-items:center; justify-content:center; width:1.75rem; height:1.75rem;
+             border-radius:9999px; background:var(--bleu); color:#fff; font-weight:700; font-size:.85rem; }
+  </style>
 </head>
-<body class="bg-slate-100 text-slate-800">
+<body class="bg-slate-50 text-slate-800">
 
-{# Macro : un groupe de cases à cocher de formats #}
+{# Macro : cases à cocher des formats #}
 {% macro cases(liste, choisis) %}
-<div class="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+<div class="grid grid-cols-2 gap-2 text-sm">
   {% for nom, l, h in liste %}
-  <label class="flex items-center gap-2">
-    <input type="checkbox" name="formats" value="{{ nom }}"
+  <label class="flex items-center gap-2 cursor-pointer rounded-lg border border-slate-200 px-3 py-2 hover:border-[#253081] hover:bg-slate-50 transition">
+    <input type="checkbox" name="formats" value="{{ nom }}" class="accent-[#253081] shrink-0"
            {{ 'checked' if (not choisis) or (nom in choisis) else '' }}>
-    <span>{{ nom }} <span class="text-slate-400">({{ l }}×{{ h }})</span></span>
+    <span class="leading-tight">{{ nom }}<span class="block text-xs text-slate-400">{{ l }}×{{ h }} px</span></span>
   </label>
   {% endfor %}
 </div>
@@ -24,7 +35,7 @@
 {# Macro : menu déroulant de la couleur de fond (palette charte) #}
 {% macro select_fond(actuel) %}
 {% set f = actuel or '#253081' %}
-<select name="couleur_fond" class="w-full border rounded px-3 py-2 bg-white">
+<select name="couleur_fond" class="champ">
   {% for hex, nom in [
       ('#253081','Bleu Gefradis'), ('#040c4d','Bleu nuit'),
       ('#e7e9f4','Blanc bleuté'), ('#f3f4f6','Gris clair'),
@@ -34,171 +45,261 @@
 </select>
 {% endmacro %}
 
-<header class="bg-[#253081] text-white">
-  <div class="max-w-5xl mx-auto px-6 py-5 flex items-center gap-3">
-    <div class="w-3 h-8 bg-[#FFD52B]"></div>
-    <h1 class="text-xl font-bold">Générateur de bannières · Gefradis</h1>
+<!-- ===================== EN-TÊTE ===================== -->
+<header class="sticky top-0 z-20 bg-white border-b border-slate-200">
+  <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+    <a href="/" class="flex items-center gap-3" title="Accueil">
+      <img src="/assets/logo/gefradis-logo-bleu-blanc.png" alt="Gefradis" class="h-9 w-auto">
+      <span class="hidden sm:block h-6 w-px bg-slate-200"></span>
+      <span class="hidden sm:block text-sm font-semibold text-slate-500">Générateur de kits graphiques</span>
+    </a>
+    <a href="/" class="text-sm font-semibold text-[#253081] hover:underline">↺ Nouveau kit</a>
   </div>
+  <div class="h-1 bg-[#FFD52B]"></div>
 </header>
 
-<main class="max-w-5xl mx-auto px-6 py-8 space-y-8">
+<main class="max-w-6xl mx-auto px-6 py-8">
 
-  <form method="post" action="/generer" class="bg-white rounded-lg shadow p-6 space-y-6">
-
-    <!-- 1. BRIEF CRÉATIF -->
-    <div class="space-y-4">
-      <h2 class="text-lg font-bold text-[#253081]">1. Brief créatif</h2>
-
-      <div>
-        <label class="block text-sm font-semibold mb-1">1.1 · Mécanique commerciale</label>
-        <textarea name="mecanique" rows="2" class="w-full border rounded px-3 py-2"
-                  placeholder="Conditions et niveaux de remise (ex : 100 € dès 1000 € HT, jusqu'à 500 €). Sur tout le catalogue ou une famille produit.">{{ brief.mecanique if brief else '' }}</textarea>
-      </div>
-
-      <div>
-        <label class="block text-sm font-semibold mb-1">1.2 · Message commercial</label>
-        <textarea name="message" rows="2" required class="w-full border rounded px-3 py-2"
-                  placeholder="Le nom de l'opération et l'axe de communication (ex : opération « Les jours Gros projets = Grosses Remises », Jusqu'à 500 € offerts sur votre commande).">{{ brief.message if brief else '' }}</textarea>
-      </div>
-
-      <div>
-        <label class="block text-sm font-semibold mb-1">
-          1.3 · Illustrations <span class="font-normal text-slate-400">(optionnel)</span>
-        </label>
-        <textarea name="illustrations" rows="2" class="w-full border rounded px-3 py-2"
-                  placeholder="Style ou visuels souhaités (ex : visuels de fenêtres).">{{ brief.illustrations if brief else '' }}</textarea>
-        <p class="text-xs text-slate-400 mt-1">
-          La charte Gefradis (logo, couleurs, police Cabin, ton) est appliquée par défaut.
-        </p>
-      </div>
-
-      <div>
-        <label class="block text-sm font-semibold mb-1">Couleur de fond</label>
-        {{ select_fond(copy.couleur_fond if copy else '') }}
-      </div>
+  <!-- ===================== VUE BRIEF ===================== -->
+  <div id="vue-brief" class="max-w-3xl mx-auto">
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold text-[#253081]">Créer un kit de bannières</h1>
+      <p class="text-slate-500 mt-1">Décrivez l'opération commerciale, choisissez les formats, et générez tout le kit à la charte Gefradis.</p>
     </div>
 
-    <!-- 2. ÉLÉMENTS À GÉNÉRER -->
-    <div class="space-y-4 pt-2 border-t">
-      <h2 class="text-lg font-bold text-[#253081]">2. Éléments à générer</h2>
-      {% for section in elements %}
-      <div>
-        <h3 class="text-sm font-bold text-[#040C4D] mb-2">{{ section.titre }}</h3>
-        {% for label, liste in section.groupes %}
-          {% if label %}<div class="text-xs font-semibold text-slate-500 mt-2 mb-1">{{ label }}</div>{% endif %}
-          {{ cases(liste, noms_choisis) }}
-        {% endfor %}
-      </div>
-      {% endfor %}
+    <form method="post" action="/generer" class="space-y-6">
 
-      <div>
-        <div class="text-xs font-semibold text-slate-500 mt-2 mb-1">Bannières Display : versions à produire</div>
-        <div class="flex flex-wrap gap-4 text-sm">
-          <label class="flex items-center gap-2">
-            <input type="checkbox" name="display_versions" value="statique"
-                   {{ 'checked' if (not display_versions) or ('statique' in display_versions) else '' }}>
-            <span>Statique (PNG)</span>
-          </label>
-          <label class="flex items-center gap-2">
-            <input type="checkbox" name="display_versions" value="anime"
-                   {{ 'checked' if (not display_versions) or ('anime' in display_versions) else '' }}>
-            <span>Animé (GIF)</span>
-          </label>
+      <!-- 1. BRIEF CRÉATIF -->
+      <section class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-4">
+        <div class="flex items-center gap-3">
+          <span class="etape">1</span>
+          <h2 class="text-lg font-bold text-[#253081]">Brief créatif</h2>
         </div>
-      </div>
-    </div>
+        <div>
+          <label class="block text-sm font-semibold mb-1">1.1 · Mécanique commerciale</label>
+          <textarea name="mecanique" rows="2" class="champ"
+            placeholder="Conditions et niveaux de remise (ex : 100 € dès 1000 € HT, jusqu'à 500 €). Tout le catalogue ou une famille produit.">{{ brief.mecanique if brief else '' }}</textarea>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold mb-1">1.2 · Message commercial <span class="text-[#253081]">*</span></label>
+          <textarea name="message" rows="2" required class="champ"
+            placeholder="Nom de l'opération et axe de communication (ex : « Gros projets = Grosses Remises », jusqu'à 500 € offerts).">{{ brief.message if brief else '' }}</textarea>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold mb-1">1.3 · Direction créative <span class="font-normal text-slate-400">(optionnel)</span></label>
+          <textarea name="illustrations" rows="2" class="champ"
+            placeholder="L'ambiance ou l'angle à mettre en avant (ex. « insister sur l'isolation et les économies d'énergie », « ton chaleureux »)...">{{ brief.illustrations if brief else '' }}</textarea>
+          <p class="text-xs text-slate-400 mt-1">La charte Gefradis (police Cabin, couleurs, ton) est appliquée par défaut.</p>
+        </div>
 
-    <button class="bg-[#253081] text-white font-semibold px-5 py-2.5 rounded hover:opacity-90">
-      {% if copy %}Régénérer le texte (Claude){% else %}Générer le kit (Claude){% endif %}
-    </button>
-  </form>
+        <div>
+          <label class="block text-sm font-semibold mb-1">Image produit</label>
+          <select name="illustrer" class="champ">
+            <option value="1" {{ 'selected' if (not copy) or copy.illustrer else '' }}>Avec une image produit</option>
+            <option value="" {{ 'selected' if copy and not copy.illustrer else '' }}>Sans image (texte seul)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold mb-1">Bouton d'appel à l'action <span class="font-normal text-slate-400">(optionnel)</span></label>
+          <input name="cta" value="{{ copy.cta if copy else '' }}" class="champ"
+                 placeholder="Texte du bouton, ex. « Découvrir la collection ». Laisser vide = pas de bouton.">
+        </div>
+      </section>
+
+      <!-- 2. STYLE & FORMATS -->
+      <section class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-5">
+        <div class="flex items-center gap-3">
+          <span class="etape">2</span>
+          <h2 class="text-lg font-bold text-[#253081]">Style &amp; formats</h2>
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold mb-1">Couleur de fond</label>
+          {{ select_fond(copy.couleur_fond if copy else '') }}
+        </div>
+
+        <div class="space-y-4 pt-2 border-t border-slate-100">
+          {% for section in elements %}
+          <div>
+            <h3 class="text-sm font-bold text-[#040C4D] mb-2">{{ section.titre }}</h3>
+            {% for label, liste in section.groupes %}
+              {% if label %}<div class="text-xs font-semibold text-slate-500 mt-2 mb-1">{{ label }}</div>{% endif %}
+              {{ cases(liste, noms_choisis) }}
+            {% endfor %}
+          </div>
+          {% endfor %}
+
+          <div>
+            <div class="text-xs font-semibold text-slate-500 mt-2 mb-1">Bannières Display : versions à produire</div>
+            <div class="flex flex-wrap gap-4 text-sm">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="display_versions" value="statique" class="accent-[#253081]"
+                       {{ 'checked' if (not display_versions) or ('statique' in display_versions) else '' }}>
+                <span>Statique (PNG)</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="display_versions" value="anime" class="accent-[#253081]"
+                       {{ 'checked' if (not display_versions) or ('anime' in display_versions) else '' }}>
+                <span>Animé (GIF)</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <button class="w-full bg-[#FFD52B] text-[#040C4D] font-bold text-lg py-3 rounded-xl shadow-sm hover:brightness-95 transition">
+        {% if copy %}Régénérer le kit{% else %}Générer le kit{% endif %}
+      </button>
+    </form>
+
+    {% if copy %}
+    <div class="mt-4 text-center">
+      <button type="button" onclick="voirApercu()" class="text-sm font-semibold text-[#253081] hover:underline">← Retour à l'aperçu</button>
+    </div>
+    {% endif %}
+  </div>
 
   {% if copy %}
-  <!-- AJUSTEMENT DU TEXTE -->
-  <section class="bg-white rounded-lg shadow p-6">
-    <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-      <h2 class="text-lg font-bold text-[#253081]">3. Ajustez le texte si besoin</h2>
-      <a href="/telecharger"
-         class="bg-[#FFD52B] text-black font-semibold px-5 py-2.5 rounded hover:opacity-90">
-        Télécharger le kit (.zip)
+  <!-- ===================== VUE RÉSULTAT ===================== -->
+  <div id="vue-resultat" class="space-y-6">
+
+    <!-- barre d'actions -->
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-4 text-sm">
+        <button type="button" onclick="voirBrief()" class="font-semibold text-[#253081] hover:underline">← Modifier le brief</button>
+        <a href="/" class="font-semibold text-slate-500 hover:underline">↺ Nouveau kit</a>
+      </div>
+      <a href="/telecharger" class="inline-flex items-center gap-2 bg-[#FFD52B] text-[#040C4D] font-bold px-5 py-2.5 rounded-lg shadow-sm hover:brightness-95 transition">
+        ⬇ Télécharger le kit (.zip)
       </a>
     </div>
 
-    <p class="text-sm text-slate-500 mb-4">
-      Catégorie détectée : <b>{{ copy.categorie }}</b>.
-      Modifiez le texte ou le fond puis « Appliquer », ou relancez Claude avec le bouton ci-dessus.
-    </p>
+    <div class="grid lg:grid-cols-3 gap-6 items-start">
 
-    <form method="post" action="/ajuster" class="grid sm:grid-cols-2 gap-4">
-      <!-- on conserve le brief et la catégorie déduite pour les re-rendus -->
-      <input type="hidden" name="mecanique" value="{{ brief.mecanique }}">
-      <input type="hidden" name="message" value="{{ brief.message }}">
-      <input type="hidden" name="illustrations" value="{{ brief.illustrations }}">
-      <input type="hidden" name="categorie" value="{{ copy.categorie }}">
-      <input type="hidden" name="illustrer" value="{{ '1' if copy.illustrer else '' }}">
-      <input type="hidden" name="offre_pastille" value="{{ '1' if copy.offre_pastille else '' }}">
-      <input type="hidden" name="offre_type" value="{{ copy.offre_type }}">
-      <input type="hidden" name="theme_transverse" value="{{ copy.theme_transverse or '' }}">
-      {% for v in (display_versions or ['statique', 'anime']) %}
-      <input type="hidden" name="display_versions" value="{{ v }}">
-      {% endfor %}
-      {% for nom in noms_choisis %}
-      <input type="hidden" name="formats" value="{{ nom }}">
-      {% endfor %}
+      <!-- panneau d'ajustement (gauche, collant) -->
+      <aside class="lg:col-span-1">
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 lg:sticky lg:top-24 space-y-3">
+          <h2 class="font-bold text-[#253081]">Ajuster le texte</h2>
+          <p class="text-xs text-slate-500">
+            Catégorie détectée : <b>{{ copy.categorie }}</b>. Modifiez le texte ou le fond puis « Appliquer »,
+            ou « Régénérer le kit » pour relancer la rédaction.
+          </p>
 
-      <div>
-        <label class="block text-sm font-semibold mb-1">Couleur de fond</label>
-        {{ select_fond(copy.couleur_fond) }}
-      </div>
-      <div>
-        <label class="block text-sm font-semibold mb-1">Accroche</label>
-        <input name="titre" value="{{ copy.titre }}" class="w-full border rounded px-3 py-2">
-      </div>
-      <div>
-        <label class="block text-sm font-semibold mb-1">Appel à l'action</label>
-        <input name="cta" value="{{ copy.cta }}" class="w-full border rounded px-3 py-2">
-      </div>
-      <div>
-        <label class="block text-sm font-semibold mb-1">Libellé de l'offre</label>
-        <input name="offre_label" value="{{ copy.offre_label }}" class="w-full border rounded px-3 py-2">
-      </div>
-      <div class="grid grid-cols-2 gap-2">
-        <div>
-          <label class="block text-sm font-semibold mb-1">Montant</label>
-          <input name="offre_nombre" value="{{ copy.offre_nombre }}" class="w-full border rounded px-3 py-2">
+          <form method="post" action="/ajuster" class="space-y-3">
+            <input type="hidden" name="mecanique" value="{{ brief.mecanique }}">
+            <input type="hidden" name="message" value="{{ brief.message }}">
+            <input type="hidden" name="illustrations" value="{{ brief.illustrations }}">
+            <input type="hidden" name="categorie" value="{{ copy.categorie }}">
+            <input type="hidden" name="illustrer" value="{{ '1' if copy.illustrer else '' }}">
+            <input type="hidden" name="offre_type" value="{{ copy.offre_type }}">
+            <input type="hidden" name="theme_transverse" value="{{ copy.theme_transverse or '' }}">
+            {% for v in (display_versions or ['statique', 'anime']) %}
+            <input type="hidden" name="display_versions" value="{{ v }}">
+            {% endfor %}
+            {% for nom in noms_choisis %}
+            <input type="hidden" name="formats" value="{{ nom }}">
+            {% endfor %}
+
+            <div>
+              <label class="block text-xs font-semibold mb-1">Couleur de fond</label>
+              {{ select_fond(copy.couleur_fond) }}
+            </div>
+            <div>
+              <label class="block text-xs font-semibold mb-1">Accroche</label>
+              <input name="titre" value="{{ copy.titre }}" class="champ">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold mb-1">Appel à l'action</label>
+              <input name="cta" value="{{ copy.cta }}" class="champ">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold mb-1">Libellé de l'offre</label>
+              <input name="offre_label" value="{{ copy.offre_label }}" class="champ">
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-xs font-semibold mb-1">Montant</label>
+                <input name="offre_nombre" value="{{ copy.offre_nombre }}" class="champ">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold mb-1">Suffixe</label>
+                <input name="offre_suffixe" value="{{ copy.offre_suffixe }}" class="champ">
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold mb-1">
+                Avantage <span class="font-normal text-slate-400">(offre non chiffrée)</span>
+              </label>
+              <input name="offre_texte" value="{{ copy.offre_texte }}" class="champ">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold mb-1">Date de validité</label>
+              <input name="date_validite" value="{{ copy.date_validite or '' }}" class="champ"
+                     placeholder="ex. Jusqu'au 5 mai 2026">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold mb-1">
+                Paliers de remise <span class="font-normal text-slate-400">(vide si offre simple)</span>
+              </label>
+              <div class="space-y-2">
+                {% for i in range(3) %}
+                {% set p = copy.paliers[i] if copy.paliers and copy.paliers|length > i else None %}
+                <div class="grid grid-cols-2 gap-2">
+                  <input name="palier_condition" value="{{ p.condition if p else '' }}" class="champ" placeholder="Dès 1000 €">
+                  <input name="palier_valeur" value="{{ p.valeur if p else '' }}" class="champ" placeholder="100 € offerts">
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+            <button class="w-full bg-[#253081] text-white font-semibold py-2.5 rounded-lg hover:opacity-90 transition">
+              Appliquer mes modifications
+            </button>
+          </form>
         </div>
-        <div>
-          <label class="block text-sm font-semibold mb-1">Suffixe</label>
-          <input name="offre_suffixe" value="{{ copy.offre_suffixe }}" class="w-full border rounded px-3 py-2">
+      </aside>
+
+      <!-- galerie d'aperçu (droite) -->
+      <div class="lg:col-span-2">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="font-bold text-[#253081]">Aperçu du kit</h2>
+          <span class="text-sm text-slate-500">{{ images|length }} visuel{{ 's' if images|length > 1 else '' }}</span>
+        </div>
+        <div class="grid sm:grid-cols-2 gap-4">
+          {% for img in images %}
+          <figure class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <figcaption class="flex items-center justify-between px-3 py-2 border-b border-slate-100 text-xs">
+              <span class="font-semibold text-slate-600 truncate">{{ img.nom }}</span>
+              <span class="text-slate-400 whitespace-nowrap pl-2">
+                {{ img.largeur }}×{{ img.hauteur }}{% if img.variante %}
+                <span class="ml-1 rounded bg-[#253081]/10 text-[#253081] px-1.5 py-0.5 font-semibold">{{ img.variante }}</span>{% endif %}
+              </span>
+            </figcaption>
+            <div class="p-3 bg-slate-100">
+              <img src="/output/kit/{{ img.fichier }}?t={{ cache }}" alt="{{ img.nom }}"
+                   class="w-full h-auto rounded border border-slate-200 bg-white">
+            </div>
+          </figure>
+          {% endfor %}
         </div>
       </div>
-      <div class="sm:col-span-2">
-        <label class="block text-sm font-semibold mb-1">
-          Offre en toutes lettres <span class="font-normal text-slate-400">(si l'offre n'est pas un montant)</span>
-        </label>
-        <input name="offre_texte" value="{{ copy.offre_texte }}" class="w-full border rounded px-3 py-2">
-      </div>
-      <div class="sm:col-span-2">
-        <button class="bg-[#253081] text-white font-semibold px-5 py-2.5 rounded hover:opacity-90">
-          Appliquer mes modifications
-        </button>
-      </div>
-    </form>
-  </section>
-
-  <!-- APERÇU DU KIT -->
-  <section class="bg-white rounded-lg shadow p-6">
-    <h2 class="text-lg font-bold text-[#253081] mb-4">4. Aperçu du kit ({{ images|length }} formats)</h2>
-    <div class="grid sm:grid-cols-2 gap-6">
-      {% for img in images %}
-      <div class="border rounded p-3">
-        <div class="text-xs text-slate-500 mb-2">{{ img.nom }} · {{ img.largeur }}×{{ img.hauteur }}{% if img.variante %} · <b>{{ img.variante }}</b>{% endif %}</div>
-        <img src="/output/kit/{{ img.fichier }}?t={{ cache }}" alt="{{ img.nom }}"
-             class="w-full h-auto border border-slate-200">
-      </div>
-      {% endfor %}
     </div>
-  </section>
+  </div>
+
+  <script>
+    function voirBrief() {
+      document.getElementById('vue-brief').style.display = '';
+      document.getElementById('vue-resultat').style.display = 'none';
+      window.scrollTo(0, 0);
+    }
+    function voirApercu() {
+      document.getElementById('vue-resultat').style.display = '';
+      document.getElementById('vue-brief').style.display = 'none';
+      window.scrollTo(0, 0);
+    }
+    // Après une génération, on affiche l'aperçu et on masque le formulaire.
+    document.getElementById('vue-brief').style.display = 'none';
+  </script>
   {% endif %}
 
 </main>

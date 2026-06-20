@@ -240,7 +240,12 @@ def generer_kit(copy: dict, formats=FORMATS, display_statique=True, display_anim
         **{champ: copy[champ] for champ in CHAMPS_GABARIT},
         "offre_type": copy.get("offre_type", "montant"),   # montant / pourcentage / texte
         "offre_texte": copy.get("offre_texte", ""),
-        "offre_pastille": copy.get("offre_pastille", False),  # remise en pastille de coin
+        # Placement de la remise décidé par le code selon le type d'offre : un pourcentage
+        # (-X%) va dans le coin comme une étiquette ; tout le reste (montant, avantage) reste
+        # au centre. La détection ne passe plus par 1.3.
+        "offre_pastille": copy.get("offre_type") == "pourcentage",
+        "paliers": copy.get("paliers", []),                # paliers de remise (grands formats)
+        "date_validite": copy.get("date_validite", ""),   # ex. "Jusqu'au 5 mai 2026"
         "cta": copy.get("cta", ""),                        # vide -> pas de bouton
         "couleur_fond": fond,
         "couleur_texte": "#ffffff" if fonce else "#040c4d",
@@ -274,6 +279,8 @@ def generer_kit(copy: dict, formats=FORMATS, display_statique=True, display_anim
         navigateur = p.chromium.launch()
         for nom, largeur, hauteur in formats:
             logo = _logo_uri(nom, fonce)   # choisi selon le fond ; None pour le site
+            # Paliers en étiquettes seulement sur les grands formats (sinon l'offre résumé).
+            montrer_paliers = bool(copy.get("paliers")) and largeur >= 700 and hauteur >= 250
             if nom.startswith("site_bandeau_categorie"):
                 # Bandeau catégorie : image d'ambiance en fond + carte bleue. Pour
                 # une opération transversale, on prend l'image ponctuelle fournie
@@ -292,7 +299,7 @@ def generer_kit(copy: dict, formats=FORMATS, display_statique=True, display_anim
                 html = gabarit_site.render(
                     largeur=largeur, hauteur=hauteur, base=base,
                     image_uri=image, montage_images=montage, evenement_uri=evenement,
-                    avec_cta=False, **contexte
+                    avec_cta=False, montrer_paliers=montrer_paliers, **contexte
                 )
             elif nom.startswith("site_header_hp"):
                 # Header d'accueil (hero) : grand message + offre (et produit si
@@ -302,7 +309,7 @@ def generer_kit(copy: dict, formats=FORMATS, display_statique=True, display_anim
                 sens = "row" if largeur / hauteur >= 2.4 else "column"
                 html = gabarit_header.render(
                     largeur=largeur, hauteur=hauteur, base=base, sens=sens,
-                    image_uri=image_promo, **contexte
+                    image_uri=image_promo, montrer_paliers=montrer_paliers, **contexte
                 )
             elif hauteur < 120:
                 # Format fin (728x90, 320x50) -> gabarit dédié, mis à l'échelle par JS
@@ -316,7 +323,8 @@ def generer_kit(copy: dict, formats=FORMATS, display_statique=True, display_anim
                 sens = "row" if largeur >= hauteur else "column"
                 html = gabarit_pub_image.render(
                     largeur=largeur, hauteur=hauteur, base=base, sens=sens,
-                    image_uri=image_promo, logo_uri=logo, **contexte
+                    image_uri=image_promo, logo_uri=logo,
+                    montrer_paliers=montrer_paliers, **contexte
                 )
             else:
                 # Carré / vertical -> disposition EN COLONNE.
@@ -325,12 +333,12 @@ def generer_kit(copy: dict, formats=FORMATS, display_statique=True, display_anim
                 justify = "space-evenly" if hauteur / largeur >= 1.4 else "center"
                 html = gabarit_colonne.render(
                     largeur=largeur, hauteur=hauteur, base=base, justify=justify,
-                    logo_uri=logo, **contexte
+                    logo_uri=logo, montrer_paliers=montrer_paliers, **contexte
                 )
             tmp.write_text(html, encoding="utf-8")
             page = navigateur.new_page(
                 viewport={"width": largeur, "height": hauteur},
-                device_scale_factor=1,
+                device_scale_factor=2,   # rendu net (retina), images en 2x
             )
             page.goto(tmp.as_uri())
             page.evaluate("document.fonts.ready")

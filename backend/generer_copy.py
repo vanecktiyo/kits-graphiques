@@ -55,8 +55,13 @@ montant de l'offre). La couleur de fond est choisie ailleurs (dans le formulaire
 
 CONTRAINTES.
 - L'accroche (titre) doit être COURTE (3 à 6 mots) : le même message servira sur
-  tous les formats, du grand au tout petit. Ne propose qu'UNE version.
+  tous les formats, du grand au tout petit. Ne propose qu'UNE version. C'est une
+  ACCROCHE (un bénéfice, une idée), JAMAIS la simple répétition de l'offre : ne mets
+  PAS le montant/pourcentage/avantage dans le titre.
 - N'invente JAMAIS de chiffre : n'utilise que les montants et conditions du brief.
+- "offre_suffixe" reste TRÈS COURT (ex. '€ offerts', '€', '%'). N'y mets JAMAIS une
+  phrase (« sur la motorisation », « par fenêtre », « d'achat »...) : ce complément va
+  dans le titre ou le libellé, pas dans le bloc jaune. "offre_texte" reste court (2-3 mots).
 - Choisis "offre_type" : "montant" (somme en €), "pourcentage" (remise en %), ou
   "texte" (offre non chiffrée). Pour montant/pourcentage, remplis offre_nombre +
   offre_suffixe (offre_texte vide). Pour texte, remplis offre_texte (court) et
@@ -68,20 +73,16 @@ CONTRAINTES.
   Fenêtres, Portes, Volets roulants, Volets battants, Portails, Clôtures,
   Portes de garage, Baies vitrées. Mets "transversale" si l'opération porte sur
   tout le catalogue.
-- Renseigne "cta" (texte du bouton d'action) UNIQUEMENT si l'INTENTION du brief
-  (1.3) est d'inclure un bouton incitant à l'action (par exemple « un bouton
-  "J'en profite" », « un appel à l'action », « incite à demander un devis »...).
-  Comprends le SENS, peu importe le mot. Sinon, laisse-le vide ("").
-- Mets "illustrer" à true si l'INTENTION du brief (1.3) est d'inclure une image ou un
-  visuel (ex. « un visuel », « une image de... », « illustré », « visuel promo »...).
-  Comprends le SENS, peu importe le mot. Sinon false. N'affecte que les pubs.
-- Mets "offre_pastille" à true si l'INTENTION du brief (1.3) est de montrer la remise
-  comme un petit badge dans un coin (style page catégorie), au lieu du bloc central.
-  Comprends le SENS quel que soit le vocabulaire (« badge », « -26 % dans le coin »,
-  « encart », « comme la page catégorie »...). Sinon false.
 - "theme_transverse" : UNIQUEMENT si l'opération est transversale ET qu'un thème de
   la liste fournie (s'il y en a une) correspond au message par le SENS (ex. « Black
   Friday »), renvoie son nom EXACT tel qu'écrit dans la liste ; sinon "" (vide).
+- "paliers" : si la mécanique (1.1) comporte plusieurs PALIERS de remise (ex. 100 €
+  dès 1000 € d'achat, 350 € dès 3000 €), liste-les (2 à 3 max) : {condition, valeur}.
+  Sinon laisse vide. Renseigne TOUJOURS aussi l'offre résumé (offre_*) avec le montant
+  le plus avantageux (elle sert sur les petits formats).
+- "date_validite" : si le brief donne une échéance, écris-la comme une MENTION COMPLÈTE et
+  autonome (ex. « Jusqu'au 30 juin 2026 », « Jusqu'à la fin du mois »), JAMAIS un fragment
+  isolé (« fin du mois », « 30 juin »). Sinon "".
 - Réponds UNIQUEMENT via l'outil fourni."""
 
 # ---------------------------------------------------------------------------
@@ -135,34 +136,38 @@ OUTIL = {
                 "description": "Pour le type 'texte' uniquement : l'offre en toutes "
                                "lettres, COURTE (ex : 'Livraison offerte'). Sinon vide.",
             },
-            "cta": {
-                "type": "string",
-                "description": "Texte du bouton d'action, si l'INTENTION du brief (1.3) "
-                               "est d'inclure un bouton (quel que soit le mot) ; sinon vide.",
-            },
-            "illustrer": {
-                "type": "boolean",
-                "description": "true si le brief (1.3) veut une image / un visuel "
-                               "(comprends le SENS : « un visuel », « une image de... », "
-                               "« illustré », « visuel promo »...) ; sinon false.",
-            },
-            "offre_pastille": {
-                "type": "boolean",
-                "description": "true si l'INTENTION du brief (1.3) est d'afficher la "
-                               "remise comme un petit badge dans un coin (au lieu du "
-                               "bloc central). Déduis-le du sens, peu importe le mot.",
-            },
             "theme_transverse": {
                 "type": "string",
                 "description": "Pour une opération transversale uniquement : le thème "
                                "de la liste fournie qui correspond au message (par le "
                                "sens), écrit EXACTEMENT comme dans la liste ; sinon ''.",
             },
+            "paliers": {
+                "type": "array",
+                "description": "Paliers de remise SI la mécanique (1.1) en comporte "
+                               "plusieurs (2 à 3 max) ; sinon liste vide.",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "condition": {"type": "string",
+                                      "description": "Le seuil, ex. 'Dès 1000 € d'achat'."},
+                        "valeur": {"type": "string",
+                                   "description": "L'avantage, ex. '100 € offerts'."},
+                    },
+                    "required": ["condition", "valeur"],
+                },
+            },
+            "date_validite": {
+                "type": "string",
+                "description": "Échéance en MENTION COMPLÈTE (ex. 'Jusqu'au 30 juin 2026', "
+                               "'Jusqu'à la fin du mois'), jamais un fragment isolé "
+                               "('fin du mois'). Sinon ''.",
+            },
         },
         "required": [
             "categorie", "titre", "offre_type", "offre_label", "offre_nombre",
-            "offre_suffixe", "offre_texte", "cta", "illustrer",
-            "offre_pastille", "theme_transverse",
+            "offre_suffixe", "offre_texte",
+            "theme_transverse", "paliers", "date_validite",
         ],
     },
 }

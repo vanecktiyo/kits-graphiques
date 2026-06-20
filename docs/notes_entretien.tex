@@ -271,6 +271,53 @@ et ciblé est souvent plus efficace qu'un prompt gonflé, qui dilue l'attention 
 modèle. Au besoin, j'ajoute des exemples et j'itère sur la sortie. »}
 
 % =====================================================================
+\section{Le prompt système ne risque-t-il pas de devenir trop lourd ?}
+% =====================================================================
+
+\textbf{Le constat :} à chaque nouvelle fonctionnalité (CTA, pastille, thème, paliers,
+date...), on ajoute une consigne. Le prompt pourrait gonfler. C'est une vraie question
+de maintenabilité.
+
+\subsection{Pourquoi le risque reste maîtrisé}
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{Le schéma de l'outil porte la spec.} Avec le \emph{tool use}, chaque
+        champ a sa \textbf{description}. La majeure partie des consignes spécifiques à
+        un champ vit donc dans le \textbf{schéma}, pas dans le prompt en prose.
+  \item \textbf{Le périmètre est borné.} Le nombre de champs est fixé par le produit
+        (offre, catégorie, image, CTA, pastille, thème, paliers, date) : il
+        \textbf{plafonne}, il ne croît pas à l'infini.
+  \item \textbf{Coût et performance.} Le system prompt reste petit face à la capacité
+        du modèle, et il peut être \textbf{mis en cache} (prompt caching) : les appels
+        répétés ne le re-paient quasiment pas.
+\end{itemize}
+
+\subsection{Le vrai risque, et la parade}
+Le danger d'un prompt qui gonfle, c'est de \textbf{diluer l'attention} du modèle et de
+devenir dur à maintenir, surtout quand une consigne est écrite \textbf{deux fois} (dans
+le prompt ET dans la description du champ). La règle de rangement :
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{Prompt en prose} = règles \textbf{générales et transversales} (rôle,
+        marque, ton, « titre court », « n'invente aucun chiffre », « réponds via l'outil »).
+  \item \textbf{Description des champs} (schéma) = consignes \textbf{spécifiques} à
+        chaque champ.
+\end{itemize}
+Ainsi, ajouter une fonctionnalité revient à ajouter \textbf{une description de champ},
+sans gonfler le prompt : il reste stable et lisible.
+
+\subsection{Le lien avec le RAG}
+Tant que la connaissance (charte éditoriale, consignes) tient proprement dans le prompt
+et le schéma, \textbf{un RAG est inutile} (sur-ingénierie). Le RAG devient pertinent le
+jour où cette connaissance devient \textbf{volumineuse et évolutive} (guidelines
+détaillées qui changent souvent, base de campagnes passées) : on l'\textbf{externalise}
+alors dans une base interrogée à la demande (V2). C'est une question d'\textbf{échelle}.
+
+\phrasea{« Le prompt ne gonfle pas tant qu'on met chaque consigne au bon endroit : les
+règles générales dans le prompt, les consignes par champ dans le schéma de l'outil
+(tool use). Ajouter une fonctionnalité, c'est ajouter une description de champ, pas une
+ligne de prompt. Et le jour où la connaissance devient trop grosse ou trop changeante
+pour tenir dans le prompt, on l'externalise dans un RAG : c'est une question d'échelle. »}
+
+% =====================================================================
 \section{Pourquoi Claude ne génère pas le HTML/CSS}
 % =====================================================================
 
@@ -304,6 +351,31 @@ abstient volontairement.
         tester et à maintenir.
 \end{itemize}
 
+\subsection{Vérifié en pratique : comparaison A / B / C}
+Pour ne pas en rester à la théorie, les trois architectures ont été construites et
+comparées sur les mêmes briefs :
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{A — gabarits figés + JSON} : un gabarit par type de bannière ; Claude
+        ne fournit que le texte structuré. Rendu très régulier et fidèle à la charte,
+        un peu rigide quand le contenu est riche (paliers, image).
+  \item \textbf{B — composable + JSON} : un gabarit unique et adaptatif ; Claude fournit
+        le texte ET propose la disposition. Même fidélité de charte que A (les briques
+        restent figées), mais une mise en page qui s'adapte mieux au contenu chargé.
+  \item \textbf{C — libre / full-LLM} : Claude génère lui-même tout le HTML/CSS, la
+        charte ne lui étant que décrite.
+\end{itemize}
+La version C a \textbf{confirmé empiriquement} les risques ci-dessus : des résultats
+\textbf{imprévisibles} (logo surdimensionné, mise en page qui varie d'un format à
+l'autre, écarts de charte possibles), en plus d'être \textbf{lente et coûteuse} (un
+appel au modèle par format). C'est précisément ce qui justifie de garder le JSON
+structuré. On \textbf{écarte donc C}, et le vrai choix se joue entre \textbf{A et B},
+qui garantissent toutes deux la charte (B ajoutant une mise en page adaptative).
+
+\phrasea{« J'ai même implémenté la version full LLM pour la confronter aux deux autres :
+elle produit des résultats imprévisibles et coûteux, ce qui valide concrètement le
+choix du JSON structuré. La décision finale se joue donc entre les gabarits figés et
+l'approche composable, qui garantissent toutes deux la charte. »}
+
 \subsection{La bonne façon d'être générique}
 Claude reste cantonné à un \textbf{JSON structuré} ; le code rend ce JSON dans des
 gabarits flexibles. Pour l'offre, Claude indique un \textbf{type}
@@ -320,12 +392,13 @@ besoin est dans le contenu, pas dans la liberté visuelle. »}
 \section{Plan de tests (couverture des cas)}
 % =====================================================================
 
-Pour valider l'outil de bout en bout, neuf briefs longs et réalistes couvrent les
+Pour valider l'outil de bout en bout, dix briefs longs et réalistes couvrent les
 trois types d'offre (montant, pourcentage, avantage) et tous les cas : opération
 catégorie ou transverse, avec ou sans image, avec ou sans bouton, remise en
-pastille, thème Black Friday, repli sur la promo par défaut, fonds clairs ou foncés
-(pour vérifier la variante de logo). Mode d'emploi : saisir 1.1/1.2/1.3, choisir le
-fond, cocher tous les formats, générer, puis comparer au résultat attendu.
+pastille, plusieurs paliers de remise avec date de validité, thème Black Friday,
+repli sur la promo par défaut, fonds clairs ou foncés (pour vérifier la variante de
+logo). Mode d'emploi : saisir 1.1/1.2/1.3, choisir le fond, cocher tous les formats,
+générer, puis comparer au résultat attendu.
 
 \subsection{Type montant (€)}
 
@@ -367,6 +440,21 @@ fond, cocher tous les formats, générer, puis comparer au résultat attendu.
   \item \textbf{Fond} Gris clair (\#F3F4F6).
   \item \textbf{Attendu} Catégorie Fenêtres, type montant, pubs typographiques (pas
         d'image), pas de bouton, pas de pastille ; le bandeau garde sa photo d'ambiance.
+\end{itemize}
+
+\textbf{M4 \textbullet{} Transverse, plusieurs paliers de remise et date de validité}
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{1.1} Opération « Gros projets = Grosses remises » sur tout le catalogue.
+        100~€ offerts dès 1000~€ HT, 350~€ offerts dès 3000~€ HT. Valable jusqu'au
+        30 juin 2026.
+  \item \textbf{1.2} Récompenser les gros paniers avec une remise qui grimpe par
+        paliers, ton clair, créer un sentiment d'opportunité avant la date limite.
+  \item \textbf{1.3} Une image de nos produits et un bouton « J'en profite ».
+  \item \textbf{Fond} Bleu Gefradis (\#253081).
+  \item \textbf{Attendu} Catégorie transversale, type montant, \textbf{deux paliers}
+        \{condition, valeur\} et une \textbf{date de validité}. Sur les grands formats,
+        les paliers s'affichent en étiquettes ; sur les petits, l'offre résumée
+        (la plus avantageuse) ; la date apparaît quand la place le permet.
 \end{itemize}
 
 \subsection{Type pourcentage (\%)}
@@ -458,10 +546,14 @@ travail d'ingénieur. »}
 \section{Résultats des tests}
 % =====================================================================
 
-Les neuf briefs du plan ont été exécutés sur l'ensemble des formats. Après une série
-de corrections, tous les rendus sont conformes aux résultats attendus. La campagne a
-surtout permis de \textbf{détecter et corriger plusieurs anomalies}, ce qui illustre
-une vraie démarche de test.
+Les neuf premiers briefs (M1 à A3) ont été exécutés sur l'ensemble des formats sur la
+version A. Après une série de corrections, tous les rendus sont conformes aux résultats
+attendus. La campagne a surtout permis de \textbf{détecter et corriger plusieurs
+anomalies}, ce qui illustre une vraie démarche de test. Le dixième brief (M4, plusieurs
+paliers et date de validité) a montré les \textbf{limites des gabarits figés} de la
+version A : avec un contenu plus riche, les mises en page rigides débordaient. C'est ce
+constat qui a motivé l'exploration des architectures B (composable) et C (libre), puis
+leur comparaison.
 
 \subsection{Bilan}
 \begin{itemize}[leftmargin=1.4em]

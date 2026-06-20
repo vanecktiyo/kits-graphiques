@@ -59,9 +59,20 @@
     display: inline-flex;
     align-items: flex-start;
   }
-  .prix .nombre { font-size: calc(var(--base) * 2.3); line-height: 1; }
-  .prix .cents  { font-size: calc(var(--base) * 0.9); margin-top: calc(var(--base) * 0.18); }
+  .prix .nombre { font-size: calc(var(--base) * 1.7); line-height: 1; }
+  .prix .cents  { font-size: calc(var(--base) * 0.85); margin-top: calc(var(--base) * 0.14); }
   .offre-texte  { font-size: calc(var(--base) * 0.95); line-height: 1.05; }
+
+  /* Paliers de remise (grands formats) + date de validité */
+  .paliers { display: flex; flex-wrap: wrap; justify-content: center; gap: calc(var(--base) * 0.35); }
+  .palier {
+    background: var(--jaune); color: #000;
+    display: flex; flex-direction: column; align-items: flex-start;
+    padding: calc(var(--base) * 0.22) calc(var(--base) * 0.45); line-height: 1.1;
+  }
+  .palier-cond { font-weight: 700; font-size: calc(var(--base) * 0.4); }
+  .palier-val  { font-weight: 700; font-size: calc(var(--base) * 0.95); }
+  .date-validite { color: var(--texte); font-weight: 700; font-size: calc(var(--base) * 0.5); }
 
   /* Bouton d'action (affiché seulement si un CTA est demandé) */
   .cta {
@@ -79,8 +90,13 @@
   <div class="banniere">
     {% if logo_uri %}<img class="logo" src="{{ logo_uri }}" alt="Gefradis">{% endif %}
     <div class="titre">{{ titre }}</div>
+    {% if date_validite %}<div class="date-validite">{{ date_validite }}</div>{% endif %}
+    {% if montrer_paliers and paliers %}
+    {% include "_paliers.html.j2" %}
+    {% else %}
     <div class="offre-label">{{ offre_label }}</div>
     <div class="prix">{% include "_prix.html.j2" %}</div>
+    {% endif %}
     {% if cta %}<div class="cta">{{ cta }}</div>{% endif %}
   </div>
 </body>
