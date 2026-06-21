@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face { font-family: 'Cabin'; src: url('../../assets/fonts/Cabin.ttf'); font-weight: 100 900; }
+
+  :root {
+    --fond:  {{ couleur_fond }};
+    --texte: {{ couleur_texte }};
+    --jaune: #FFD52B;
+    --bouton: {{ couleur_bouton }};
+    --bouton-texte: {{ couleur_bouton_texte }};
+    --base: {{ base }}px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  /* GABARIT UNIQUE : Claude compose la DISPOSITION ; le code assemble les briques
+     figées de la charte. Le contenu est posé dans un CADRE qui est ensuite mis à
+     l'échelle (JS) pour tenir EXACTEMENT dans le format : rien ne déborde jamais. */
+  .banniere {
+    position: relative;
+    width:  {{ largeur }}px;
+    height: {{ hauteur }}px;
+    {% if disposition == 'bandeau' and fond_image %}
+    background: var(--fond) url('{{ fond_image }}') center / auto 100% repeat-x;
+    {% else %}
+    background: var(--fond);
+    {% endif %}
+    font-family: 'Cabin', sans-serif;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+
+  /* Le cadre remplit TOUTE la bannière (largeur + hauteur). Les composants sont ensuite
+     étalés dedans pour occuper l'espace ; le JS le met à l'échelle si jamais ça déborde. */
+  .cadre {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    gap: calc(var(--base) * 0.9);
+    padding: calc(var(--base) * 1.0);
+  }
+  .cadre.centre, .cadre.empile { flex-direction: column; }
+  .cadre.cote, .cadre.bandeau, .cadre.hero  { flex-direction: row; }
+  .cadre.ligne { flex-direction: row; width: auto; flex-shrink: 0; }
+  /* Empilé (image dessous) : contenu en haut, l'image remplit toute la hauteur restante. */
+  .cadre.empile { justify-content: flex-start; }
+  /* Hero (en-tête large) : texte à gauche, image à droite ; hauteur basée sur le contenu
+     + mise à l'échelle si ça déborde (format court et dense -> pas de coupe). */
+  .hero .contenu { align-items: flex-start; text-align: left; flex: 1.3; }
+  .hero .produit { flex: 1; }
+  .hero .titre { font-size: calc(var(--base) * 1.0); }
+  .hero .offre-label { font-size: calc(var(--base) * 0.42); }
+  .hero .prix .nombre { font-size: calc(var(--base) * 0.9); }
+  .hero .cta { font-size: calc(var(--base) * 0.42); }
+
+  .contenu { display: flex; flex-direction: column; gap: calc(var(--base) * 0.8); max-width: 100%; }
+  .centre .contenu, .empile .contenu { align-items: center; text-align: center; width: 100%; }
+  /* On étale les composants sur toute la hauteur (logo en haut, offre au milieu, bouton
+     en bas) au lieu de les tasser au centre : c'est ça, exploiter l'espace. */
+  .centre .contenu, .cote .contenu { min-height: 100%; justify-content: space-between; }
+  .cote .contenu  { align-items: flex-start; text-align: left; flex: 1; }
+  .ligne .contenu { flex-direction: row; align-items: center; gap: calc(var(--base) * 0.45); white-space: nowrap; }
+
+  /* Bandeau : carte opaque (lisibilité sur l'image de fond) + visuel d'événement. */
+  .bandeau .contenu { background: var(--fond); padding: calc(var(--base) * 0.9) calc(var(--base) * 1.4);
+                      align-items: center; text-align: center; }
+  .evenement { height: calc(var(--base) * 4.5); width: auto; max-width: 28%; object-fit: contain; flex-shrink: 0; }
+
+  .logo { height: calc(var(--base) * 1.25); width: auto; border-radius: calc(var(--base) * 0.16); }
+  .ligne .logo { height: calc(var(--base) * 1.0); }
+
+  .titre { color: var(--texte); font-weight: 700; line-height: 1.05; font-size: calc(var(--base) * 1.35); }
+  .cote .titre, .empile .titre { font-size: calc(var(--base) * 0.95); }
+  .bandeau .titre { font-size: calc(var(--base) * 1.0); }
+  .ligne .titre { white-space: nowrap; font-size: calc(var(--base) * 0.95); }
+
+  .date-validite { color: var(--texte); font-weight: 700; font-size: calc(var(--base) * 0.45); }
+
+  /* Offre : gros nombre + suffixe (signature Gefradis), sans démesure. */
+  .offre { display: inline-flex; align-items: center; gap: calc(var(--base) * 0.35); flex-wrap: nowrap; }
+  /* En disposition centrée, l'offre s'empile (libellé centré au-dessus du prix centré)
+     pour que tout reste sur le même axe vertical. */
+  .centre .offre, .empile .offre, .bandeau .offre { flex-direction: column; gap: calc(var(--base) * 0.25); }
+  .offre-label { color: var(--texte); font-weight: 700; font-size: calc(var(--base) * 0.55); white-space: nowrap; }
+  .prix { background: var(--jaune); color: #000; font-weight: 700;
+          display: inline-flex; align-items: flex-start;
+          padding: calc(var(--base) * 0.1) calc(var(--base) * 0.34); }
+  .prix .nombre { font-size: calc(var(--base) * 1.35); line-height: 1; }
+  .prix .cents  { font-size: calc(var(--base) * 0.62); margin-top: calc(var(--base) * 0.08); }
+  .prix .offre-texte { font-size: calc(var(--base) * 0.7); line-height: 1.05; }
+  .cote .offre-label, .empile .offre-label, .ligne .offre-label { font-size: calc(var(--base) * 0.42); }
+  .cote .prix .nombre, .empile .prix .nombre, .ligne .prix .nombre { font-size: calc(var(--base) * 0.9); }
+  .cote .prix .offre-texte, .empile .prix .offre-texte { font-size: calc(var(--base) * 0.55); }
+
+  /* Les pavés s'ADAPTENT à leur contenu (le jaune épouse le texte), au lieu de s'étirer
+     sur toute la largeur, ce qui laissait de grandes plages de jaune vides. Ils sont
+     groupés au centre et aérés. Charte respectée : jaune #FFD52B, Cabin gras, angles nets. */
+  .paliers { display: flex; flex-wrap: nowrap; gap: calc(var(--base) * 0.55);
+             width: 100%; justify-content: center; }
+  .paliers.col { flex-direction: column; align-items: center; }
+  .palier { background: var(--jaune); color: #000; display: flex; flex-direction: column;
+            align-items: center; text-align: center; justify-content: center; flex-shrink: 0;
+            gap: calc(var(--base) * 0.1);
+            padding: calc(var(--base) * 0.3) calc(var(--base) * 0.8); line-height: 1.1; }
+  .palier-cond { font-weight: 700; font-size: calc(var(--base) * 0.4); white-space: nowrap; }
+  .palier-val  { font-weight: 700; font-size: calc(var(--base) * 0.88); white-space: nowrap; }
+  .cote .palier-val, .empile .palier-val { font-size: calc(var(--base) * 0.7); }
+  .cote .palier-cond, .empile .palier-cond { font-size: calc(var(--base) * 0.32); }
+
+  .cta { background: var(--bouton); color: var(--bouton-texte); font-weight: 700;
+         font-size: calc(var(--base) * 0.5); padding: calc(var(--base) * 0.26) calc(var(--base) * 0.75);
+         border-radius: 999px; white-space: nowrap; }
+  .cote .cta, .empile .cta, .ligne .cta { font-size: calc(var(--base) * 0.42); }
+
+  .produit { flex: 1; align-self: stretch; display: flex; align-items: center;
+             justify-content: center; min-width: 0; min-height: 0; }
+  .cote .produit { flex: 1.2; min-width: 42%; }
+  /* flex: 1 0 38% = l'image garde au moins 38% de la hauteur (ne se fait jamais écraser
+     par un contenu dense) et grandit pour remplir quand le contenu est court. */
+  .empile .produit { flex: 1 0 38%; width: 100%; min-height: 0; }
+  /* width/height 100% (pas seulement max) : l'image AGRANDIT pour remplir sa zone
+     (l'image source est petite, ~318px) ; object-fit conserve les proportions. */
+  .produit img { width: 100%; height: 100%; object-fit: contain; }
+</style>
+</head>
+<body>
+{% set paliers_colonne = largeur < 700 %}
+  <div class="banniere">
+    <div class="cadre {{ disposition }}">
+
+    {% if disposition == 'bandeau' %}
+      {% if evenement_uri %}<img class="evenement" src="{{ evenement_uri }}" alt="">{% endif %}
+      <div class="contenu">
+        <div class="titre">{{ titre }}</div>
+        {% if date_validite %}<div class="date-validite">{{ date_validite }}</div>{% endif %}
+        {% if montrer_paliers and paliers %}
+        <div class="paliers {% if paliers_colonne %}col{% endif %}">{% for p in paliers %}<div class="palier"><span class="palier-cond">{{ p.condition }}</span><span class="palier-val">{{ p.valeur }}</span></div>{% endfor %}</div>
+        {% else %}
+        <div class="offre"><span class="offre-label">{{ offre_label }}</span><span class="prix">{% if offre_type == 'texte' %}<span class="offre-texte">{{ offre_texte }}</span>{% else %}<span class="nombre">{{ offre_nombre }}</span><span class="cents">{{ offre_suffixe }}</span>{% endif %}</span></div>
+        {% endif %}
+      </div>
+
+    {% else %}
+      <div class="contenu">
+        {% if logo_uri %}<img class="logo" src="{{ logo_uri }}" alt="Gefradis">{% endif %}
+        <div class="titre">{{ titre }}</div>
+        {% if date_validite %}<div class="date-validite">{{ date_validite }}</div>{% endif %}
+        {% if montrer_paliers and paliers %}
+        <div class="paliers {% if paliers_colonne %}col{% endif %}">{% for p in paliers %}<div class="palier"><span class="palier-cond">{{ p.condition }}</span><span class="palier-val">{{ p.valeur }}</span></div>{% endfor %}</div>
+        {% else %}
+        <div class="offre"><span class="offre-label">{{ offre_label }}</span><span class="prix">{% if offre_type == 'texte' %}<span class="offre-texte">{{ offre_texte }}</span>{% else %}<span class="nombre">{{ offre_nombre }}</span><span class="cents">{{ offre_suffixe }}</span>{% endif %}</span></div>
+        {% endif %}
+        {% if cta %}<div class="cta">{{ cta }}</div>{% endif %}
+      </div>
+      {% if image_uri and disposition in ['cote', 'empile', 'hero'] %}
+      <div class="produit"><img src="{{ image_uri }}" alt=""></div>
+      {% endif %}
+    {% endif %}
+
+    </div>
+  </div>
+</body>
+</html>

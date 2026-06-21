@@ -105,7 +105,7 @@
 \begin{flushleft}
 {\sffamily\large
 \textbf{Auteur :} Vaneck \\[0.2cm]
-\textbf{Version :} 0.4 (conception)\\[0.2cm]
+\textbf{Version :} 0.5 (conception)\\[0.2cm]
 \textbf{Date :} \today
 }
 \end{flushleft}
@@ -156,19 +156,21 @@ L'outil suit le principe \textbf{entrée, traitement, sortie}.
 
 \begin{itemize}[leftmargin=1.4em]
   \item \textbf{F1. Saisie du brief :} l'utilisateur décrit la mécanique
-        commerciale (1.1), le message commercial (1.2), en option les illustrations
-        (1.3 : style souhaité et demande éventuelle d'une image), et choisit la
-        \textbf{couleur de fond} dans la palette de la charte (menu déroulant).
+        commerciale (1.1), le message commercial (1.2), en option la direction
+        créative (1.3 : style et angle souhaités), et choisit dans le formulaire la
+        \textbf{couleur de fond}, la présence d'une \textbf{image produit} et le texte
+        du \textbf{bouton} (menus déroulants et champs).
   \item \textbf{F2. Sélection des formats :} l'utilisateur coche les bannières
         à produire (site, Google Display, Google Pmax, Meta).
   \item \textbf{F3. Génération du texte :} le système transforme le brief en
         contenu structuré (accroche, offre de type montant, pourcentage ou texte,
-        appel à l'action) et déduit la catégorie, le besoin d'image et, pour une
-        opération transversale, le thème (ex. Black Friday).
-  \item \textbf{F4. Composition :} selon le \textbf{type} de bannière (bandeau site,
-        header, publicité, format fin), le système assemble le texte, les couleurs,
-        la police, le logo et, si besoin, l'image de la catégorie (banque d'images),
-        aux dimensions exactes et à la charte.
+        paliers, date) et déduit la catégorie et, pour une opération transversale, le
+        thème (ex. Black Friday). L'image et le bouton, eux, viennent du formulaire.
+  \item \textbf{F4. Composition :} pour chaque format, le système calcule une
+        \textbf{disposition} et assemble le texte, les couleurs, la police, le logo et,
+        si demandé, l'image (banque d'images), dans un \textbf{gabarit composable
+        unique} où le contenu occupe tout l'espace et est mis à l'échelle, aux
+        dimensions exactes et à la charte.
   \item \textbf{F5. Aperçu :} le système affiche toutes les bannières générées.
   \item \textbf{F6. Ajustement et régénération :} l'utilisateur peut modifier
         le brief et relancer la génération autant de fois que nécessaire.
@@ -419,8 +421,11 @@ l'IA et le moteur.
 \begin{itemize}[leftmargin=1.4em]
   \item \texttt{mecanique} (1.1) : texte libre (conditions et niveaux de remise).
   \item \texttt{message} (1.2) : nom de l'opération et accroche.
-  \item \texttt{illustrations} (1.3) : style graphique souhaité et éventuelle demande
-        d'une image (optionnel). À défaut, la charte s'applique.
+  \item \texttt{illustrations} (1.3) : direction créative, style et angle souhaités
+        (optionnel). À défaut, la charte s'applique.
+  \item \texttt{illustrer} : avec ou sans \textbf{image produit} (menu déroulant).
+  \item \texttt{cta} : texte du \textbf{bouton} d'appel à l'action (champ ; vide = pas
+        de bouton).
   \item \texttt{couleur\_fond} : couleur de fond choisie dans la palette (menu
         déroulant ; \texttt{\#253081} par défaut).
   \item \texttt{formats} : liste des bannières à produire (cases cochées).
@@ -439,26 +444,28 @@ pour le cas de test :
   "offre_nombre":     "500",
   "offre_suffixe":    "EUR offerts",
   "offre_texte":      "",
-  "cta":              "J'en profite",
-  "illustrer":        false,
-  "offre_pastille":   false,
+  "paliers":          [{"condition": "Des 1000 EUR HT", "valeur": "100 EUR offerts"},
+                       {"condition": "Des 3000 EUR HT", "valeur": "350 EUR offerts"}],
+  "date_validite":    "Jusqu'au 30 juin 2026",
   "theme_transverse": ""
 }
 \end{lstlisting}
 
-\textbf{Claude ne produit que ce JSON, jamais de HTML.} C'est le code Python qui
-injecte ensuite ces valeurs dans un \textbf{gabarit fixe} (Jinja2) aux dimensions
-exactes du format, avant le rendu par Playwright. Ce choix garantit l'absence
-d'erreurs de parsing (HTML tronqué, guillemets mal échappés) et le respect strict
-des dimensions. Les champs clés : \texttt{categorie} (une des familles produit, ou
+\textbf{Claude ne produit que ce JSON, jamais de HTML.} Il ne rédige que le
+\textbf{texte} (accroche, offre, paliers, date) et déduit quelques paramètres
+(catégorie, type d'offre, thème transverse). L'\textbf{image}, le \textbf{bouton}
+et la \textbf{couleur de fond} ne viennent PAS de Claude : ce sont des champs du
+\textbf{formulaire}. C'est ensuite le code Python qui injecte ces valeurs dans le
+gabarit, avant le rendu par Playwright ; ce choix garantit l'absence d'erreurs de
+parsing (HTML tronqué, guillemets mal échappés) et le respect strict des
+dimensions. Les champs clés : \texttt{categorie} (une des familles produit, ou
 \texttt{transversale}) sert à choisir l'image ; \texttt{offre\_type}
 (\texttt{montant}, \texttt{pourcentage} ou \texttt{texte}) commande le rendu de
-l'offre ; \texttt{illustrer} indique si une image accompagne les pubs ;
-\texttt{offre\_pastille} affiche la remise en badge de coin ;
+l'offre ; \texttt{paliers} porte les niveaux de remise (2 à 3) pour une mécanique
+par paliers ; \texttt{date\_validite} l'échéance en mention complète ;
 \texttt{theme\_transverse} sélectionne le visuel d'une opération transversale (ex.
-Black Friday). La \textbf{couleur de fond} ne vient pas de Claude : elle est choisie
-dans le formulaire. Le \textbf{même message} est conservé sur tous les formats : les
-gabarits adaptent la taille du texte aux petits formats.
+Black Friday). Le \textbf{même message} est conservé sur tous les formats : le
+gabarit adapte la taille du contenu à chaque format.
 
 % =====================================================================
 \section{Système de design et génération créative}
@@ -469,45 +476,54 @@ charte n'est pas un moule, mais un \textbf{cadre} à respecter. La conception re
 sur deux rôles complémentaires.
 
 \begin{itemize}[leftmargin=1.4em]
-  \item \textbf{Le système de design (les contraintes) :} la charte encodée en
-        \emph{gabarits réutilisables} pré-construits aux dimensions exactes, avec
-        \textbf{toute la palette de la charte}, la police Cabin et le logo. Chaque
-        rendu est conforme à la charte. C'est le cadre non négociable qui garantit
-        le respect de la marque et des dimensions.
-  \item \textbf{L'IA, concepteur-rédacteur (la créativité) :} à partir du brief
-        (dont le champ \textbf{1.3 illustrations}), Claude rédige le copy et
-        \textbf{déduit} la catégorie, le type d'offre, le besoin d'image et, pour une
-        opération transversale, le thème. La \textbf{couleur de fond} est choisie par
-        l'utilisateur dans le formulaire (plus prévisible). Claude ne génère pas de
+  \item \textbf{Le système de design (les contraintes) :} la charte encodée dans un
+        \textbf{gabarit composable unique}. Le code calcule, pour chaque format, une
+        \textbf{disposition} et y place les briques de la charte (logo, accroche,
+        offre ou paliers, bouton, image) avec \textbf{toute la palette}, la police
+        Cabin et le logo. Le contenu \textbf{occupe tout l'espace disponible} et est
+        \textbf{mis à l'échelle} pour tenir exactement dans le format, sans jamais
+        déborder. Chaque rendu est conforme à la charte : c'est le cadre non
+        négociable qui garantit le respect de la marque et des dimensions.
+  \item \textbf{L'IA, concepteur-rédacteur (la créativité) :} à partir du brief,
+        Claude rédige le copy (accroche, offre, paliers, date) et \textbf{déduit} la
+        catégorie, le type d'offre et, pour une opération transversale, le thème.
+        L'\textbf{image}, le \textbf{bouton} et la \textbf{couleur de fond} sont
+        choisis dans le \textbf{formulaire} (plus prévisible). Claude ne génère pas de
         HTML : c'est le code qui rend.
 \end{itemize}
 
-Ce choix (l'IA \emph{rédige et paramètre}, le code \emph{rend}) est le plus
+Ce choix (l'IA \emph{rédige}, le code \emph{compose et rend}) est le plus
 \textbf{fiable} : aucune erreur de HTML généré, des dimensions toujours exactes, la
-charte toujours respectée. La créativité vient du copy et des choix de composition
-(image, pastille, thème), guidés par le brief ; le cadre visuel reste verrouillé.
+charte toujours respectée. La créativité vient du copy et du \textbf{montage}
+(disposition adaptée au format, occupation de l'espace), pendant que le cadre visuel
+reste verrouillé.
 
 \textbf{Style par défaut :} le menu de couleur de fond propose le \textbf{bleu St
-Patricks} \texttt{\#253081} par défaut ; sans image demandée (1.3 vide), on obtient
+Patricks} \texttt{\#253081} par défaut ; sans image (option du formulaire), on obtient
 une variante purement \textbf{typographique}, très propre.
 
-\subsection{Les types de bannières}
-Chaque format appartient à un \textbf{type} qui détermine sa mise en page (le type
-se déduit du nom du format) :
+\subsection{Le montage composable : une disposition par format}
+Plutôt que cinq gabarits figés, l'outil utilise \textbf{un seul gabarit adaptatif}.
+Pour chaque format, le code choisit une \textbf{disposition} en fonction des
+proportions et du contenu, puis met le tout à l'échelle :
 \begin{itemize}[leftmargin=1.4em]
   \item \textbf{Bandeau de page catégorie} (site) : image d'ambiance de la
         catégorie en fond + \textbf{carte bleue} en surimpression (titre + offre).
-  \item \textbf{Header d'accueil} (site, « hero ») : grand message à gauche, offre
-        (et produit détouré si le brief le demande) à droite, sur fond de la charte.
-  \item \textbf{Publicité} (Google Display, Pmax, Meta) : mise en page typographique
-        (accroche + offre + bouton optionnel). Si le brief (1.3) demande une image,
-        le \textbf{produit détouré} est placé \emph{dans le cadre}, à côté du texte
-        (disposition en ligne ou en colonne selon le format).
-  \item \textbf{Formats fins} (728x90, 320x50) : gabarit dédié ; le contenu est mis
-        \textbf{à l'échelle automatiquement} pour tenir, quel que soit le texte.
+  \item \textbf{En-tête d'accueil} (site) : mise en page \textbf{typographique}
+        (accroche + offre/paliers + bouton), \textbf{sans image produit}, répartie
+        sur toute la surface.
+  \item \textbf{Avec image} (pubs / site illustrés) : le \textbf{produit détouré} est
+        placé \emph{dans le cadre}, \textbf{à côté} du texte (format large) ou
+        \textbf{en dessous} (format étroit/portrait), et garde une part de surface
+        garantie.
+  \item \textbf{Typographique} (sans image) : accroche + offre/paliers + bouton,
+        \textbf{répartis} pour remplir l'espace.
+  \item \textbf{Formats fins} (728x90, 320x50) : tout passe sur une \textbf{ligne}
+        et est \textbf{agrandi} pour remplir la bande.
 \end{itemize}
-Les bannières \textbf{site} portent toujours une image ; les \textbf{pubs} seulement
-si le brief le demande.
+Dans tous les cas, le contenu est \textbf{mesuré} après rendu et le cadre est
+\textbf{réduit ou recentré} pour tenir exactement : rien ne déborde jamais, quel que
+soit le brief.
 
 \subsection{La banque d'images}
 Les visuels produit sont organisés par catégorie, dans
@@ -525,12 +541,14 @@ Claude reçoit la liste des thèmes et choisit, d'après le message, le visuel a
 L'outil sert des opérations commerciales variées : l'offre peut être un
 \textbf{montant} (« Jusqu'à 500 € »), un \textbf{pourcentage} (« -26 \% ») ou un
 \textbf{avantage} en toutes lettres (« Livraison offerte »). Claude renseigne
-\texttt{offre\_type} et le gabarit rend chacun avec le style adapté, toujours dans le
-bloc jaune de la charte. Pour les pourcentages, le signe « - » est ajouté selon le
-\textbf{sens} du message (présent pour « Jusqu'à 20 \% », absent pour « Économisez
-20 \% »). En option (\texttt{offre\_pastille}), la remise s'affiche en \textbf{badge
-de coin} au lieu du bloc central. Seul le \textbf{message} est affiché, jamais le
-détail des paliers de la mécanique, qui reste sur la page de destination.
+\texttt{offre\_type} et le gabarit rend chacun avec le \textbf{même style} (le bloc
+jaune de la charte qui épouse le texte), quel que soit le type. Pour les pourcentages,
+le signe « - » est ajouté selon le \textbf{sens} du message (présent pour « Jusqu'à
+20 \% », absent pour « Économisez 20 \% »). Quand la mécanique comporte des
+\textbf{paliers} (ex. « 100 € dès 1000 €, 350 € dès 3000 € »), ils sont affichés en
+\textbf{pavés jaunes} (côte à côte ou empilés selon le format) sur les bannières qui
+ont la place ; sur les très petits formats, on retombe sur l'offre résumée. La
+\textbf{date de validité}, si elle est fournie, est affichée en mention complète.
 
 % =====================================================================
 \section{Parcours utilisateur (UX)}
@@ -609,13 +627,14 @@ L'objectif est un rendu d'outil professionnel et lisible, distinct du style
 \section{Rôle de l'IA et stratégie de prompt}
 % =====================================================================
 \textbf{Ce que fait l'IA (Claude) :} elle joue le rôle de \emph{concepteur-rédacteur}.
-Elle rédige le copy et \textbf{déduit} les paramètres structurés (catégorie, type
-d'offre, besoin d'image, thème transversal, pastille). \textbf{Ce qu'elle ne fait
-pas :} choisir la mise en page (le \textbf{type} de bannière se déduit du format),
-choisir la couleur de fond (champ du formulaire), générer du HTML ou une image
-matricielle. Sa sortie est \textbf{uniquement un JSON} ; c'est le code Python qui
-l'injecte dans un gabarit fixe, rendu en PNG par Playwright. Cela garantit l'absence
-d'erreur de parsing, des dimensions toujours exactes et le respect strict de la charte.
+Elle rédige le copy (accroche, offre, paliers, date) et \textbf{déduit} quelques
+paramètres structurés (catégorie, type d'offre, thème transversal). \textbf{Ce qu'elle
+ne fait pas :} choisir la mise en page (la \textbf{disposition} est calculée par le
+code à partir du format), choisir la couleur de fond, l'image ou le bouton (ce sont des
+champs du \textbf{formulaire}), générer du HTML ou une image matricielle. Sa sortie est
+\textbf{uniquement un JSON} ; c'est le code Python qui l'injecte dans le gabarit
+\textbf{composable}, rendu en PNG par Playwright. Cela garantit l'absence d'erreur de
+parsing, des dimensions toujours exactes et le respect strict de la charte.
 
 \textbf{Stratégie de prompt :} un \emph{prompt système} fixe le rôle et surtout les
 \textbf{contraintes} (« Tu es le concepteur-rédacteur de Gefradis. Garde le même
@@ -686,7 +705,7 @@ Google Pmax & Tailles standard \\
 Mécanique commerciale & Donnée saisie par l'utilisateur : l'outil est \textbf{générique} \\
 Référence visuelle & Fond bleu, titre blanc et chiffre clé dans un bloc jaune \\
 Interface & Architecture découplée : backend \textbf{FastAPI} et frontend \textbf{HTML/Tailwind} ; UX en base neutre avec accents de marque \\
-Couleur de fond & Choisie par l'utilisateur dans la palette (menu), pas par l'IA : plus prévisible \\
+Fond, image, bouton & Choisis par l'utilisateur dans le formulaire (menus et champs), pas par l'IA : plus prévisible \\
 Logo & Posé sur les bannières publicitaires uniquement ; variante selon la couleur du fond \\
 \bottomrule
 \end{tabular}
@@ -700,7 +719,8 @@ Logo & Posé sur les bannières publicitaires uniquement ; variante selon la cou
   \item \textbf{Dimensions du site :} communiquées (HP 1900x456 et 426x575 ;
         catégorie 2560x280, sans version mobile).
   \item \textbf{Logo :} sur les bannières display (Google, Meta), pas sur le site.
-  \item \textbf{Bouton d'action :} détection depuis le brief (1.3) validée par le client.
+  \item \textbf{Bouton d'action :} saisi dans le \textbf{formulaire} (champ dédié,
+        optionnel) ; le principe du bouton a été validé par le client.
 \end{itemize}
 
 % =====================================================================
@@ -749,9 +769,9 @@ Regles STRICTES :
 - N'invente aucun chiffre : utilise seulement les conditions du brief.
 - Reponds UNIQUEMENT via l'outil (JSON valide), sans HTML.
 Champs : categorie, titre, offre_type (montant/pourcentage/texte), offre_label,
-offre_nombre, offre_suffixe, offre_texte, cta, illustrer (bool),
-offre_pastille (bool), theme_transverse.
-La couleur de fond n'est PAS choisie par l'IA : elle vient du formulaire.
+offre_nombre, offre_suffixe, offre_texte, paliers, date_validite, theme_transverse.
+L'image, le bouton et la couleur de fond ne sont PAS choisis par l'IA :
+ils viennent du formulaire.
 \end{lstlisting}
 
 \textbf{Message utilisateur} (le brief et le format) :
@@ -773,9 +793,8 @@ Format vise : Meta 1080x1080 (carre)
   "offre_nombre": "500",
   "offre_suffixe": "EUR offerts",
   "offre_texte": "",
-  "cta": "J'en profite",
-  "illustrer": false,
-  "offre_pastille": false,
+  "paliers": [],
+  "date_validite": "",
   "theme_transverse": ""
 }
 \end{lstlisting}
@@ -783,10 +802,13 @@ Format vise : Meta 1080x1080 (carre)
 \vspace{1em}
 \hrule
 \vspace{0.5em}
-{\small\itshape Fin du cahier de conception (version 0.4). Version 0.4 : dimensions
-du site confirmées ; couleur de fond choisie au formulaire (et non par l'IA) ; logo
-sur les pubs selon le fond (détourage automatique) ; banque d'images transverses par
-thème (ex. Black Friday) avec promo par défaut ; pastille de remise ; signe des
-pourcentages géré selon le sens du message.}
+{\small\itshape Fin du cahier de conception (version 0.5). Version 0.5 : gabarit
+\textbf{composable unique} (une disposition calculée par format, le contenu occupe tout
+l'espace et est mis à l'échelle, sans débordement) ; image, bouton et couleur de fond
+choisis au \textbf{formulaire} (et non par l'IA) ; gestion des \textbf{paliers} de
+remise et de la \textbf{date de validité} ; en-tête d'accueil typographique, sans image
+produit ; suppression de la pastille de coin (la remise est intégrée à la composition).
+Pour mémoire (0.4) : dimensions du site confirmées ; logo sur les pubs selon le fond
+(détourage automatique) ; banque d'images transverses par thème.}
 
 \end{document}

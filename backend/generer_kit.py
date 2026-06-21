@@ -279,8 +279,10 @@ def generer_kit(copy: dict, formats=FORMATS, display_statique=True, display_anim
         navigateur = p.chromium.launch()
         for nom, largeur, hauteur in formats:
             logo = _logo_uri(nom, fonce)   # choisi selon le fond ; None pour le site
-            # Paliers en étiquettes seulement sur les grands formats (sinon l'offre résumé).
-            montrer_paliers = bool(copy.get("paliers")) and largeur >= 700 and hauteur >= 250
+            # Paliers : dès qu'il y a la place de les empiler (ils passent en colonne
+            # sur les formats étroits/portrait). Offre résumée seulement sur les formats
+            # vraiment minuscules : bandes fines et gratte-ciel 160 px (trop étroit).
+            montrer_paliers = bool(copy.get("paliers")) and largeur >= 250 and hauteur >= 250
             if nom.startswith("site_bandeau_categorie"):
                 # Bandeau catégorie : image d'ambiance en fond + carte bleue. Pour
                 # une opération transversale, on prend l'image ponctuelle fournie
@@ -309,7 +311,7 @@ def generer_kit(copy: dict, formats=FORMATS, display_statique=True, display_anim
                 sens = "row" if largeur / hauteur >= 2.4 else "column"
                 html = gabarit_header.render(
                     largeur=largeur, hauteur=hauteur, base=base, sens=sens,
-                    image_uri=image_promo, montrer_paliers=montrer_paliers, **contexte
+                    image_uri=None, montrer_paliers=montrer_paliers, **contexte
                 )
             elif hauteur < 120:
                 # Format fin (728x90, 320x50) -> gabarit dédié, mis à l'échelle par JS
