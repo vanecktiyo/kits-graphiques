@@ -227,6 +227,10 @@
               <input name="titre" value="{{ copy.titre }}" class="champ">
             </div>
             <div>
+              <label class="block text-xs font-semibold mb-1">Sous-titre <span class="font-normal text-slate-400">(optionnel)</span></label>
+              <input name="sous_titre" value="{{ copy.sous_titre or '' }}" class="champ" placeholder="ex. sur-mesure">
+            </div>
+            <div>
               <label class="block text-xs font-semibold mb-1">Appel à l'action</label>
               <input name="cta" value="{{ copy.cta }}" class="champ">
             </div>

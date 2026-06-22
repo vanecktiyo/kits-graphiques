@@ -1,0 +1,18 @@
+# On garde le contexte de build léger et SANS secret ni fichiers générés.
+.git/
+.venv/
+venv/
+**/__pycache__/
+*.pyc
+*.log
+.env
+output/
+comparaison_tmp/
+composable/output/
+suite_de_notre_échange/
+
+# Versions A et C : non nécessaires pour déployer B.
+backend/
+frontend/
+libre/
+docs/

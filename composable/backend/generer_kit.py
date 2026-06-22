@@ -47,7 +47,7 @@ FORMATS = [
     ("site_bandeau_categorie", 2560, 280),
 ]
 
-CHAMPS_GABARIT = ("titre", "offre_label", "offre_nombre", "offre_suffixe")
+CHAMPS_GABARIT = ("titre", "sous_titre", "offre_label", "offre_nombre", "offre_suffixe")
 FONDS_FONCES = {"#253081", "#040c4d"}
 
 ASSETS_CAT = RACINE / "assets" / "produit" / "catégorie"

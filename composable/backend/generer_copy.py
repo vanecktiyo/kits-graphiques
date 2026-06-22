@@ -42,9 +42,13 @@ texte de la bannière (accroche, offre, paliers, date). L'image, le bouton et la
 fond sont choisis dans le formulaire ; le placement de la remise est géré par le code.
 
 CONTRAINTES.
-- L'accroche (titre) doit être COURTE (3 à 6 mots) : le même message sert sur tous les
-  formats. Ne propose qu'UNE version. C'est une ACCROCHE (un bénéfice, une idée), JAMAIS la
-  simple répétition de l'offre : ne mets PAS le montant/pourcentage/avantage dans le titre.
+- L'accroche (titre) doit être COURTE (3 à 6 mots, ou moins si un sous_titre la complète) :
+  le même message sert sur tous les formats. Ne propose qu'UNE version. C'est une ACCROCHE
+  (un bénéfice, une idée), JAMAIS la simple répétition de l'offre : ne mets PAS le
+  montant/pourcentage/avantage dans le titre.
+- "sous_titre" : sous-accroche COURTE (1 à 3 mots) qui complète ou qualifie l'accroche,
+  UNIQUEMENT quand le message s'y prête (ex. accroche « Fenêtres », sous_titre « sur-mesure » ;
+  ou « en direct d'usine »). Sinon laisse-le VIDE. Ne répète pas l'offre.
 - N'invente JAMAIS de chiffre : n'utilise que les montants et conditions du brief.
 - "offre_type" : "montant", "pourcentage" ou "texte" (offre non chiffrée). Pour
   montant/pourcentage, remplis offre_nombre + offre_suffixe (offre_texte vide). Pour
@@ -78,7 +82,8 @@ OUTIL = {
                                    "Portails", "Clôtures", "Portes de garage", "Baies vitrées",
                                    "transversale"],
                           "description": "Catégorie produit DÉDUITE ; 'transversale' si tout le catalogue."},
-            "titre": {"type": "string", "description": "Accroche courte (3 à 6 mots)."},
+            "titre": {"type": "string", "description": "Accroche courte (3 à 6 mots, ou moins si un sous_titre la complète)."},
+            "sous_titre": {"type": "string", "description": "Sous-accroche courte (1 à 3 mots) qui complète l'accroche si le message s'y prête (ex. 'sur-mesure') ; sinon vide."},
             "offre_type": {"type": "string", "enum": ["montant", "pourcentage", "texte"],
                            "description": "'montant', 'pourcentage' ou 'texte' (non chiffré)."},
             "offre_label": {"type": "string", "description": "Libellé devant l'offre (ex. 'Jusqu'à'). Peut être vide."},
@@ -99,7 +104,7 @@ OUTIL = {
                               "(ex. 'Jusqu'au 30 juin 2026', 'Jusqu'à la fin du mois'), jamais "
                               "un fragment isolé ('fin du mois'). Sinon ''."},
         },
-        "required": ["categorie", "titre", "offre_type", "offre_label",
+        "required": ["categorie", "titre", "sous_titre", "offre_type", "offre_label",
                      "offre_nombre", "offre_suffixe", "offre_texte",
                      "theme_transverse", "paliers", "date_validite"],
     },

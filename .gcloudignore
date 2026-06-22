@@ -1,0 +1,20 @@
+# Ce que gcloud N'ENVOIE PAS à Cloud Build (contexte de build léger et sans secret).
+.git/
+.gitignore
+.venv/
+venv/
+**/__pycache__/
+*.pyc
+*.log
+.env
+output/
+comparaison_tmp/
+composable/output/
+suite_de_notre_échange/
+
+# Versions A et C : pas nécessaires pour déployer B.
+backend/
+frontend/
+libre/
+docs/
+*.md

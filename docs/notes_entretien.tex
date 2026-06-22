@@ -200,8 +200,8 @@ La charte se divise en deux types de règles, respectées à deux endroits
 distincts. C'est le point central de l'architecture.
 
 \subsection{La charte visuelle : dans les gabarits et le code (déterministe)}
-Les règles visuelles sont \textbf{codées en dur} dans les gabarits HTML/CSS
-(dossier \texttt{app/templates/}) :
+Les règles visuelles sont \textbf{codées en dur} dans le gabarit HTML/CSS
+(\texttt{composable/backend/bannieres/}) :
 \begin{itemize}[leftmargin=1.4em]
   \item \textbf{Couleurs exactes} (\#253081, \#FFD52B, \#FFFDE5) déclarées en
         variables CSS.
@@ -213,6 +213,29 @@ Les règles visuelles sont \textbf{codées en dur} dans les gabarits HTML/CSS
   \item \textbf{Dimensions exactes} : fixées par Python et Playwright pour chaque
         format.
 \end{itemize}
+
+\subsection{Une seule police, une taille adaptée à chaque format}
+La charte impose la \textbf{police} (Cabin) et la \textbf{hiérarchie} des éléments, mais
+\textbf{pas} les tailles exactes : un kit qui va du 320×50 au 2560×280 ne peut pas
+utiliser la même taille de texte partout. Le dimensionnement est donc une décision
+d'ingénierie, conçue pour rester cohérente :
+\begin{itemize}[leftmargin=1.4em]
+  \item Chaque format calcule une \textbf{taille de base} proportionnelle à ses
+        dimensions (par exemple proportionnelle à sa plus petite dimension).
+  \item Tous les éléments (titre, prix, bouton, paliers) sont des \textbf{multiples de
+        cette base}, avec une hiérarchie cohérente d'un format à l'autre.
+  \item Le contenu est enfin \textbf{mis à l'échelle} pour tenir exactement dans le
+        format, sans débordement.
+\end{itemize}
+Résultat : la \textbf{police} est la même partout, la \textbf{taille absolue} s'adapte à
+chaque format, et les \textbf{proportions} restent constantes, ce qui assure la cohérence
+de marque du petit display au grand bandeau.
+
+\phrasea{« Toutes les bannières utilisent la même police, Cabin, et le même système de
+proportions. La taille, elle, est calculée pour chaque format : une base proportionnelle
+aux dimensions, puis les éléments en multiples de cette base, et enfin une mise à
+l'échelle. La charte fixe la police et la hiérarchie, pas les tailles exactes : cette
+adaptation est une décision de conception pour rester cohérent sur tous les formats. »}
 
 \subsection{La charte éditoriale : dans le prompt système}
 Ce que les gabarits ne peuvent pas garantir, c'est la \textbf{voix} du texte. Le
@@ -227,10 +250,13 @@ est donc \textbf{physiquement impossible} d'introduire une couleur, une police o
 une forme hors charte. La créativité de l'IA reste enfermée dans des briques déjà
 conformes.
 
-\subsection{En toute transparence : ce qui n'est pas encore en place}
-Le logo n'est pas encore intégré aux gabarits (en attente du fichier vectoriel) ;
-la palette complète (Midnight, Ghost white) et les photos produit ne sont pas
-encore utilisées (variante typographique d'abord).
+\subsection{En toute transparence : les évolutions possibles}
+Le cœur est en place (logo intégré selon le fond, palette de la charte, photos produit
+détourées, gabarit composable) et l'application est \textbf{déployée}. Restent des pistes
+d'évolution (V2) : la \textbf{sélection des visuels par métadonnées} (au lieu de « première
+image du dossier ») ; un \textbf{contrôle qualité} automatique (vérifications en code, puis
+relecture IA optionnelle) ; et le champ \textbf{1.3 pilotant la mise en page} (l'utilisateur
+décrit où placer les éléments, l'IA renvoie des options balisées que le gabarit applique).
 
 \phrasea{« La charte est respectée à deux niveaux : le visuel (couleurs, police,
 formes, dimensions) est codé en dur dans les gabarits, donc déterministe ;
@@ -274,18 +300,19 @@ modèle. Au besoin, j'ajoute des exemples et j'itère sur la sortie. »}
 \section{Le prompt système ne risque-t-il pas de devenir trop lourd ?}
 % =====================================================================
 
-\textbf{Le constat :} à chaque nouvelle fonctionnalité (CTA, pastille, thème, paliers,
-date...), on ajoute une consigne. Le prompt pourrait gonfler. C'est une vraie question
-de maintenabilité.
+\textbf{Le constat :} à chaque champ que Claude doit produire (offre, thème transverse,
+paliers, date...), on ajoute une consigne. Le prompt pourrait gonfler. C'est une vraie
+question de maintenabilité.
 
 \subsection{Pourquoi le risque reste maîtrisé}
 \begin{itemize}[leftmargin=1.4em]
   \item \textbf{Le schéma de l'outil porte la spec.} Avec le \emph{tool use}, chaque
         champ a sa \textbf{description}. La majeure partie des consignes spécifiques à
         un champ vit donc dans le \textbf{schéma}, pas dans le prompt en prose.
-  \item \textbf{Le périmètre est borné.} Le nombre de champs est fixé par le produit
-        (offre, catégorie, image, CTA, pastille, thème, paliers, date) : il
-        \textbf{plafonne}, il ne croît pas à l'infini.
+  \item \textbf{Le périmètre est borné.} Le nombre de champs rédigés par Claude est fixé
+        par le produit (offre, catégorie, thème transverse, paliers, date) : il
+        \textbf{plafonne}, il ne croît pas à l'infini. L'image, le bouton et le fond, eux,
+        viennent du formulaire, pas du prompt.
   \item \textbf{Coût et performance.} Le system prompt reste petit face à la capacité
         du modèle, et il peut être \textbf{mis en cache} (prompt caching) : les appels
         répétés ne le re-paient quasiment pas.
@@ -396,8 +423,9 @@ Les briefs ci-dessous sont rédigés \textbf{comme le ferait l'équipe marketing
 avec un contexte), et NON taillés pour les fonctionnalités : ils servent à \textbf{vérifier
 que l'outil se comporte bien} sur des cas réels. Rappel du modèle de saisie : l'\textbf{offre}
 (montant / pourcentage / avantage, paliers, date) est détectée dans 1.1 et 1.2 ; l'\textbf{image},
-le \textbf{bouton} et la \textbf{couleur de fond} sont des choix du formulaire ; le \textbf{placement
-de la remise} (un -X\% va dans le coin quand il y a une image, le reste au centre) est automatique.
+le \textbf{bouton} et la \textbf{couleur de fond} sont des choix du formulaire. Quel que soit son
+type, l'offre est affichée comme un \textbf{composant intégré à la composition} (le bloc jaune de
+la charte), dimensionné et placé selon le format.
 Chaque cas donne le brief (1.1/1.2/1.3), les réglages du formulaire, puis \emph{ce qu'on vérifie}.
 
 \subsection{Type montant (€)}
@@ -416,8 +444,9 @@ Chaque cas donne le brief (1.1/1.2/1.3), les réglages du formulaire, puis \emph
   \item \textbf{Formulaire} Image : avec ; Bouton : « Découvrir la collection » ; Fond :
         Blanc bleuté (\#E7E9F4).
   \item \textbf{On vérifie} La catégorie \textbf{Portes} est déduite ; offre de type
-        \textbf{montant} (« à partir de 639,85~€ ») ; l'image de portes apparaît (pubs,
-        header, bandeau) ; le bouton est présent ; la date « jusqu'à la fin du mois »
+        \textbf{montant} (« à partir de 639,85~€ ») ; l'image de portes apparaît sur les pubs
+        et le bandeau (l'en-tête reste typographique, sans image produit) ; le bouton est
+        présent ; la date « jusqu'à la fin du mois »
         s'affiche ; logo bleu (fond clair) ; le titre est une accroche, pas la répétition
         du prix.
 \end{itemize}
@@ -480,10 +509,10 @@ Chaque cas donne le brief (1.1/1.2/1.3), les réglages du formulaire, puis \emph
         en avant pour déclencher l'achat avant rupture.
   \item \textbf{1.3 Direction créative} Style promo, dynamique.
   \item \textbf{Formulaire} Image : avec ; Bouton : aucun ; Fond : Blanc bleuté (\#E7E9F4).
-  \item \textbf{On vérifie} Type \textbf{pourcentage} (-30~\%), image de fenêtres ; comme
-        c'est un \textbf{-X\% avec une image}, l'outil place \textbf{automatiquement} la
-        remise en petit dans le coin (le produit reste visible), sans qu'on l'ait demandé
-        dans le brief.
+  \item \textbf{On vérifie} Type \textbf{pourcentage} (-30~\%), image de fenêtres ; le
+        \textbf{-30~\%} s'affiche comme l'offre, dans le \textbf{bloc jaune intégré à la
+        composition} (même traitement que les montants et les avantages), bien lisible à côté
+        de l'image.
 \end{itemize}
 
 \textbf{P2 \textbullet{} French Days (transverse, thème inconnu, -20\%)}
@@ -496,7 +525,7 @@ Chaque cas donne le brief (1.1/1.2/1.3), les réglages du formulaire, puis \emph
   \item \textbf{Formulaire} Image : avec ; Bouton : aucun ; Fond : Bleu Gefradis (\#253081).
   \item \textbf{On vérifie} Catégorie transversale ; le thème « French Days » est
         \textbf{inconnu} (absent du dossier) → \textbf{repli sur la promo par défaut} dans
-        les pubs ; type pourcentage ; -20~\% placé au coin (auto, car image présente) ;
+        les pubs ; type pourcentage ; le -20~\% s'affiche comme offre intégrée (bloc jaune) ;
         logo bleu-jaune.
 \end{itemize}
 
@@ -511,8 +540,8 @@ Chaque cas donne le brief (1.1/1.2/1.3), les réglages du formulaire, puis \emph
         Gris clair (\#F3F4F6).
   \item \textbf{On vérifie} Catégorie Volets roulants, type pourcentage ; le \textbf{suffixe
         reste court} (« \% ») et « sur la motorisation » va dans le titre ou le libellé (pas
-        coincé dans le bloc jaune) ; bouton présent ; \textbf{sans image, le -X\% reste au
-        centre} (le coin n'a de sens que pour préserver un produit).
+        coincé dans le bloc jaune) ; bouton présent ; le \textbf{-25~\%} s'affiche comme offre
+        intégrée à la composition, lisible même sans image.
 \end{itemize}
 
 \subsection{Type avantage (non chiffré)}
@@ -591,13 +620,15 @@ anomalies}, ce qui illustre une vraie démarche de test. Le dixième brief (M4, 
 paliers et date de validité) a montré les \textbf{limites des gabarits figés} de la
 version A : avec un contenu plus riche, les mises en page rigides débordaient. C'est ce
 constat qui a motivé l'exploration des architectures B (composable) et C (libre), puis
-leur comparaison.
+leur comparaison. La version \textbf{B (composable) a finalement été retenue, finalisée et
+déployée en ligne} : elle exploite tout l'espace et gère sans débordement les contenus
+riches (paliers, date) qui mettaient les gabarits figés de A en difficulté.
 
 \subsection{Bilan}
 \begin{itemize}[leftmargin=1.4em]
   \item \textbf{Couvert et validé :} déduction de la catégorie, du type d'offre
-        (montant / pourcentage / avantage), du besoin d'image et du thème transverse
-        (Black Friday) ; pastille de remise ; bouton détecté depuis le 1.3 ; logo
+        (montant / pourcentage / avantage), des paliers, de la date et du thème transverse
+        (Black Friday) ; image, bouton et couleur de fond choisis au formulaire ; logo
         selon le fond ; bandeaux catégorie et transverse.
   \item \textbf{Repli par défaut :} une opération transverse sans thème connu
         (French Days) utilise bien la \emph{promo par défaut}.
@@ -630,5 +661,72 @@ types d'offre et tous les formats. Elle a révélé des anomalies concrètes (ch
 du logo, débordement sur mobile, image de bandeau rognée, signe des remises...) que j'ai
 corrigées une à une. C'est cette boucle test, diagnostic, correction qui donne confiance
 dans le rendu final. »}
+
+% =====================================================================
+\section{Déploiement en production sur Google Cloud}
+% =====================================================================
+
+L'application n'est pas qu'un prototype local : elle est \textbf{déployée et accessible
+en ligne} sur Google Cloud, à une URL publique.
+
+\subsection{L'architecture de production}
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{Image Docker} (Python + Playwright/Chromium + police Cabin) :
+        l'application empaquetée, identique en local et en ligne, stockée dans
+        \textbf{Artifact Registry}.
+  \item \textbf{Cloud Run} exécute des conteneurs à partir de cette image. Il
+        \textbf{scale automatiquement} (plusieurs instances en cas de trafic,
+        \textbf{zéro} quand c'est inactif, donc 0~€ au repos).
+  \item \textbf{Secret Manager} contient la clé de l'API Claude : jamais dans l'image
+        ni dans le code, injectée à l'exécution.
+  \item \textbf{Cloud Storage} stocke les bannières générées, dans un bucket partagé
+        monté comme dossier de sortie de l'application.
+\end{itemize}
+
+\subsection{Deux vrais problèmes rencontrés et résolus}
+Le déploiement n'a pas été un simple « clic » : deux difficultés concrètes, typiques du
+cloud, ont dû être comprises et corrigées.
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{Image refusée par Cloud Run (« Container import failed »).} Par défaut,
+        le constructeur d'images (BuildKit) ajoute des \emph{attestations} qui
+        transforment l'image en « manifest list », que Cloud Run ne sait pas importer.
+        \emph{Correctif :} reconstruire une image simple (\texttt{-{}-provenance=false}).
+  \item \textbf{Images manquantes dans l'aperçu en ligne.} Cloud Run lance plusieurs
+        instances ; les bannières écrites sur le disque d'une instance n'existaient pas
+        sur les autres. En chargeant les 17 visuels, certains tombaient sur une instance
+        « vide » \(\rightarrow\) image manquante. C'est le piège du \textbf{système de
+        fichiers éphémère et par-instance} de Cloud Run. \emph{Correctif :} stocker les
+        sorties dans \textbf{Cloud Storage} (bucket partagé), visible par toutes les
+        instances.
+\end{itemize}
+
+\subsection{Les commandes clés}
+\begin{verbatim}
+# 1. Activer les services
+gcloud services enable run.googleapis.com cloudbuild.googleapis.com \
+  artifactregistry.googleapis.com secretmanager.googleapis.com
+
+# 2. Cle API dans Secret Manager
+printf '%s' "CLE" | gcloud secrets create anthropic-api-key \
+  --data-file=- --replication-policy=automatic
+
+# 3. Construire et pousser l'image (image simple, sans attestation)
+docker build --provenance=false --platform linux/amd64 -t IMG .
+docker push IMG
+
+# 4. Deployer sur Cloud Run (cle + bucket + scaling)
+gcloud run deploy gefradis-kits --image IMG --region europe-west9 \
+  --memory 2Gi --cpu 2 --execution-environment gen2 --allow-unauthenticated \
+  --set-secrets ANTHROPIC_API_KEY=anthropic-api-key:latest \
+  --add-volume=name=kitvol,type=cloud-storage,bucket=BUCKET \
+  --add-volume-mount=volume=kitvol,mount-path=/app/composable/output
+\end{verbatim}
+
+\phrasea{« J'ai conteneurisé l'application avec Docker, puis je l'ai déployée sur Cloud
+Run : l'image est dans Artifact Registry, la clé API dans Secret Manager, et les
+bannières générées dans Cloud Storage. Cloud Run scale tout seul et descend à zéro quand
+c'est inactif. J'ai aussi résolu deux vrais problèmes de cloud : une image refusée à
+cause des attestations BuildKit, et le système de fichiers éphémère par-instance, corrigé
+en passant par un bucket Cloud Storage partagé. »}
 
 \end{document}

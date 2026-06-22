@@ -75,6 +75,15 @@
   .bandeau .titre { font-size: calc(var(--base) * 1.0); }
   .ligne .titre { white-space: nowrap; font-size: calc(var(--base) * 0.95); }
 
+  /* Sous-accroche : complément court sous l'accroche, plus petit et plus léger.
+     Le bloc accroche garde le titre et le sous-titre serrés (petit gap propre). */
+  .accroche-bloc { display: flex; flex-direction: column; gap: calc(var(--base) * 0.12); }
+  .sous-titre { color: var(--texte); font-weight: 500; line-height: 1.1; opacity: 0.9;
+                font-size: calc(var(--base) * 0.55); }
+  .cote .sous-titre, .empile .sous-titre { font-size: calc(var(--base) * 0.42); }
+  .bandeau .sous-titre { font-size: calc(var(--base) * 0.45); }
+  .ligne .sous-titre { white-space: nowrap; font-size: calc(var(--base) * 0.42); }
+
   .date-validite { color: var(--texte); font-weight: 700; font-size: calc(var(--base) * 0.45); }
 
   /* Offre : gros nombre + suffixe (signature Gefradis), sans démesure. */
@@ -132,11 +141,11 @@
     {% if disposition == 'bandeau' %}
       {% if evenement_uri %}<img class="evenement" src="{{ evenement_uri }}" alt="">{% endif %}
       <div class="contenu">
-        <div class="titre">{{ titre }}</div>
+        <div class="accroche-bloc"><div class="titre">{{ titre }}</div>{% if sous_titre %}<div class="sous-titre">{{ sous_titre }}</div>{% endif %}</div>
         {% if date_validite %}<div class="date-validite">{{ date_validite }}</div>{% endif %}
         {% if montrer_paliers and paliers %}
         <div class="paliers {% if paliers_colonne %}col{% endif %}">{% for p in paliers %}<div class="palier"><span class="palier-cond">{{ p.condition }}</span><span class="palier-val">{{ p.valeur }}</span></div>{% endfor %}</div>
-        {% else %}
+        {% elif offre_nombre or offre_suffixe or offre_texte %}
         <div class="offre"><span class="offre-label">{{ offre_label }}</span><span class="prix">{% if offre_type == 'texte' %}<span class="offre-texte">{{ offre_texte }}</span>{% else %}<span class="nombre">{{ offre_nombre }}</span><span class="cents">{{ offre_suffixe }}</span>{% endif %}</span></div>
         {% endif %}
       </div>
@@ -144,11 +153,11 @@
     {% else %}
       <div class="contenu">
         {% if logo_uri %}<img class="logo" src="{{ logo_uri }}" alt="Gefradis">{% endif %}
-        <div class="titre">{{ titre }}</div>
+        <div class="accroche-bloc"><div class="titre">{{ titre }}</div>{% if sous_titre %}<div class="sous-titre">{{ sous_titre }}</div>{% endif %}</div>
         {% if date_validite %}<div class="date-validite">{{ date_validite }}</div>{% endif %}
         {% if montrer_paliers and paliers %}
         <div class="paliers {% if paliers_colonne %}col{% endif %}">{% for p in paliers %}<div class="palier"><span class="palier-cond">{{ p.condition }}</span><span class="palier-val">{{ p.valeur }}</span></div>{% endfor %}</div>
-        {% else %}
+        {% elif offre_nombre or offre_suffixe or offre_texte %}
         <div class="offre"><span class="offre-label">{{ offre_label }}</span><span class="prix">{% if offre_type == 'texte' %}<span class="offre-texte">{{ offre_texte }}</span>{% else %}<span class="nombre">{{ offre_nombre }}</span><span class="cents">{{ offre_suffixe }}</span>{% endif %}</span></div>
         {% endif %}
         {% if cta %}<div class="cta">{{ cta }}</div>{% endif %}

@@ -105,7 +105,7 @@
 \begin{flushleft}
 {\sffamily\large
 \textbf{Auteur :} Vaneck \\[0.2cm]
-\textbf{Version :} 0.5 (conception)\\[0.2cm]
+\textbf{Version :} 0.6 (conception)\\[0.2cm]
 \textbf{Date :} \today
 }
 \end{flushleft}
@@ -286,27 +286,6 @@ La figure~\ref{fig:archi} montre les composants et le flux principal.
 \label{fig:archi}
 \end{figure}
 
-\subsection{Architecture de production (GCP)}
-En production, l'application est hébergée et appelle les modèles via les services
-Google Cloud (figure~\ref{fig:gcp}).
-
-\begin{figure}[h]
-\centering
-\begin{tikzpicture}[node distance=1.0cm and 1.5cm, font=\small\sffamily]
-  \node[ext] (user) {Marketing};
-  \node[block, right=2.0cm of user, minimum width=3.4cm] (app) {App FastAPI\\(+ frontend)};
-  \node[draw=gefblue, very thick, dashed, rounded corners, fit=(app), inner sep=10pt, label={[gefblue,font=\footnotesize\bfseries]above:Cloud Run}] (cr) {};
-  \node[block, right=3.0cm of app] (vertex) {Vertex AI\\(Claude)};
-  \node[store, below=1.2cm of app] (storage) {Cloud Storage\\(assets + kits)};
-
-  \draw[arr] (user) -- node[above,font=\scriptsize]{URL} (app);
-  \draw[arr] (app) -- node[above,font=\scriptsize]{copy} (vertex);
-  \draw[arr] (app) -- (storage);
-\end{tikzpicture}
-\caption{Architecture cible en production sur Google Cloud Platform.}
-\label{fig:gcp}
-\end{figure}
-
 \subsection{Pile technique}
 \begin{center}\small
 \begin{tabular}{@{}l l@{}}
@@ -319,7 +298,7 @@ Frontend (interface) & HTML/CSS et Tailwind \\
 Génération de texte & API Claude (SDK \texttt{anthropic}) \\
 Composition d'images & HTML/CSS rendu en PNG via Playwright \\
 Animations & GIF, HTML5, MP4 (à partir d'une source unique) \\
-Production & Cloud Run, Vertex AI, Cloud Storage \\
+Production & Cloud Run, Artifact Registry, Secret Manager, Cloud Storage \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -689,6 +668,63 @@ et \textbf{MP4}, plus lourds, sont relégués en évolution (V2) pour ne pas met
 délai en péril.
 
 % =====================================================================
+\section{Déploiement et mise en production (GCP)}
+% =====================================================================
+Le déploiement est une \textbf{phase à part entière} du développement. L'application est
+\textbf{déployée} sur Google Cloud, accessible à une URL publique (figure~\ref{fig:gcp}).
+
+\subsection{Conteneurisation}
+L'application est empaquetée dans une \textbf{image Docker} (Python, Playwright/Chromium
+et la police Cabin embarquée). La \textbf{même image} tourne à l'identique en local et en
+production, ce qui supprime les écarts d'environnement. Elle est stockée dans
+\textbf{Artifact Registry}.
+
+\subsection{Architecture en production}
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[node distance=1.0cm and 1.4cm, font=\small\sffamily]
+  \node[ext] (user) {Marketing};
+  \node[block, right=2.0cm of user, minimum width=3.4cm] (app) {Conteneur\\FastAPI + rendu};
+  \node[draw=gefblue, very thick, dashed, rounded corners, fit=(app), inner sep=10pt, label={[gefblue,font=\footnotesize\bfseries]above:Cloud Run}] (cr) {};
+  \node[block, right=3.0cm of app] (claude) {API Claude\\(Anthropic)};
+  \node[store, below=1.3cm of app] (storage) {Cloud Storage\\(bannières)};
+  \node[store, below=1.3cm of user] (ar) {Artifact Registry\\(image Docker)};
+  \node[store, below=1.3cm of claude] (secret) {Secret Manager\\(clé API)};
+
+  \draw[arr] (user) -- node[above,font=\scriptsize]{URL} (app);
+  \draw[arr] (app) -- node[above,font=\scriptsize]{copy} (claude);
+  \draw[arr] (app) -- node[right,font=\scriptsize]{kits} (storage);
+  \draw[arr] (ar) -- node[left,font=\scriptsize]{image} (app);
+  \draw[arr] (secret) -- node[right,font=\scriptsize]{clé} (app);
+\end{tikzpicture}
+\caption{Architecture déployée en production sur Google Cloud Platform.}
+\label{fig:gcp}
+\end{figure}
+
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{Cloud Run} exécute des conteneurs à partir de l'image ; il scale
+        automatiquement (plusieurs instances en charge, \textbf{zéro} au repos, donc
+        0~\eur{} inactif).
+  \item \textbf{Secret Manager} fournit la clé de l'API Claude : jamais dans l'image ni
+        dans le code, injectée à l'exécution.
+  \item \textbf{Cloud Storage} stocke les bannières générées, dans un bucket partagé monté
+        comme dossier de sortie, donc visible par \textbf{toutes} les instances.
+  \item Le texte est produit via l'\textbf{API Anthropic directe} ; passer par
+        \textbf{Vertex AI} (Claude dans Model Garden) serait l'évolution 100\,\%
+        GCP-native (facturation et authentification unifiées).
+\end{itemize}
+
+\subsection{Deux points d'attention résolus}
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{Format de l'image :} les \emph{attestations} ajoutées par défaut par
+        BuildKit produisent une « manifest list » que Cloud Run refuse à l'import. On
+        construit donc une image simple (\texttt{-{}-provenance=false}).
+  \item \textbf{Filesystem éphémère :} le disque de Cloud Run est \textbf{par-instance} et
+        temporaire ; sans stockage partagé, des images générées manquaient d'une instance
+        à l'autre. D'où l'écriture des sorties dans Cloud Storage.
+\end{itemize}
+
+% =====================================================================
 \section{Décisions, hypothèses et question ouverte}
 % =====================================================================
 \subsection{Décisions assumées}
@@ -802,13 +838,17 @@ Format vise : Meta 1080x1080 (carre)
 \vspace{1em}
 \hrule
 \vspace{0.5em}
-{\small\itshape Fin du cahier de conception (version 0.5). Version 0.5 : gabarit
-\textbf{composable unique} (une disposition calculée par format, le contenu occupe tout
-l'espace et est mis à l'échelle, sans débordement) ; image, bouton et couleur de fond
-choisis au \textbf{formulaire} (et non par l'IA) ; gestion des \textbf{paliers} de
-remise et de la \textbf{date de validité} ; en-tête d'accueil typographique, sans image
-produit ; suppression de la pastille de coin (la remise est intégrée à la composition).
-Pour mémoire (0.4) : dimensions du site confirmées ; logo sur les pubs selon le fond
-(détourage automatique) ; banque d'images transverses par thème.}
+{\small\itshape Fin du cahier de conception (version 0.6). Version 0.6 : ajout d'une
+\textbf{section indépendante « Déploiement et mise en production »} (conteneurisation
+Docker, Cloud Run, Artifact Registry, Secret Manager, Cloud Storage ; API Anthropic
+directe, Vertex AI en évolution) reflétant l'application réellement \textbf{déployée en
+ligne}. Version 0.5 : gabarit \textbf{composable unique} (une disposition calculée par
+format, le contenu occupe tout l'espace et est mis à l'échelle, sans débordement) ;
+image, bouton et couleur de fond choisis au \textbf{formulaire} (et non par l'IA) ;
+gestion des \textbf{paliers} de remise et de la \textbf{date de validité} ; en-tête
+d'accueil typographique, sans image produit ; suppression de la pastille de coin (la
+remise est intégrée à la composition). Pour mémoire (0.4) : dimensions du site
+confirmées ; logo sur les pubs selon le fond (détourage automatique) ; banque d'images
+transverses par thème.}
 
 \end{document}

@@ -149,6 +149,7 @@ def ajuster(
     palier_condition: list[str] = Form(default=[]),
     palier_valeur: list[str] = Form(default=[]),
     titre: str = Form(...),
+    sous_titre: str = Form(""),
     offre_label: str = Form(""),
     offre_nombre: str = Form(""),
     offre_suffixe: str = Form(""),
@@ -163,7 +164,7 @@ def ajuster(
         paliers = [{"condition": c.strip(), "valeur": v.strip()}
                    for c, v in zip(palier_condition, palier_valeur)
                    if c.strip() and v.strip()]
-        copy = {"categorie": categorie, "titre": titre,
+        copy = {"categorie": categorie, "titre": titre, "sous_titre": sous_titre,
                 "offre_type": offre_type, "offre_label": offre_label,
                 "offre_nombre": offre_nombre, "offre_suffixe": offre_suffixe,
                 "offre_texte": offre_texte, "cta": cta, "couleur_fond": couleur_fond,
@@ -194,5 +195,8 @@ def telecharger():
 
 
 if __name__ == "__main__":
+    import os
     import uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=8001)
+    # En local : 127.0.0.1:8001. En conteneur/Cloud Run : HOST=0.0.0.0 et PORT injectés.
+    uvicorn.run(app, host=os.environ.get("HOST", "127.0.0.1"),
+                port=int(os.environ.get("PORT", "8001")))
