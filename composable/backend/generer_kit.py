@@ -216,6 +216,8 @@ def _disposition_format(nom, largeur, hauteur, copy, image_promo):
 def _base_format(nom, largeur, hauteur, disposition):
     if disposition == "bandeau":
         return round(hauteur * 0.14, 2)
+    if nom == "site_header_hp_mobile":
+        return round(min(largeur, hauteur) * 0.11, 2)    # mobile : accroche un peu plus petite
     if nom.startswith("site_header"):
         return round(min(largeur, hauteur) * 0.16, 2)   # base sur la plus petite dimension
     if disposition == "ligne":
