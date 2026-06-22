@@ -217,7 +217,7 @@ def _base_format(nom, largeur, hauteur, disposition):
     if disposition == "bandeau":
         return round(hauteur * 0.14, 2)
     if nom == "site_header_hp_mobile":
-        return round(min(largeur, hauteur) * 0.11, 2)    # mobile : accroche un peu plus petite
+        return round(min(largeur, hauteur) * 0.10, 2)    # mobile : accroche un peu plus petite
     if nom.startswith("site_header"):
         return round(min(largeur, hauteur) * 0.16, 2)   # base sur la plus petite dimension
     if disposition == "ligne":
@@ -225,6 +225,15 @@ def _base_format(nom, largeur, hauteur, disposition):
     if disposition in ("cote", "empile"):
         return round(min(largeur, hauteur) * 0.095, 2)
     return round(min(largeur, hauteur) * 0.085, 2)
+
+
+def _sauts(texte):
+    """Transforme les retours à la ligne (champ accroche multi-ligne du panneau
+    « Ajuster ») en <br> sur la bannière. En génération automatique, Claude ne met pas
+    de retour : la fonction renvoie alors le texte inchangé. Les lignes vides (double
+    Entrée) sont ignorées pour éviter de gros écarts."""
+    lignes = [l.strip() for l in str(texte).replace("\r\n", "\n").replace("\r", "\n").split("\n")]
+    return "<br>".join(l for l in lignes if l)
 
 
 def generer_kit(copy: dict, formats=FORMATS, display_statique=True, display_anime=True):
@@ -246,6 +255,8 @@ def generer_kit(copy: dict, formats=FORMATS, display_statique=True, display_anim
         "couleur_bouton": "#ffffff" if fonce else "#253081",
         "couleur_bouton_texte": "#253081" if fonce else "#ffffff",
     }
+    # Retours à la ligne saisis dans le champ accroche (zone multi-ligne) -> <br>.
+    contexte["titre"] = _sauts(contexte["titre"])
 
     categorie = copy.get("categorie", "transversale")
     if copy.get("illustrer"):

@@ -12,7 +12,7 @@
   <style>
     :root { --bleu:#253081; --nuit:#040C4D; --jaune:#FFD52B; }
     body { font-family:'Cabin', ui-sans-serif, system-ui, sans-serif; }
-    .champ { width:100%; border:1px solid #cbd5e1; border-radius:.5rem; padding:.55rem .75rem; background:#fff; }
+    .champ { width:100%; border:1px solid #cbd5e1; border-radius:.5rem; padding:.55rem .75rem; background:#fff; font:inherit; resize:vertical; }
     .champ:focus { outline:none; border-color:var(--bleu); box-shadow:0 0 0 3px rgba(37,48,129,.2); }
     .etape { display:inline-flex; align-items:center; justify-content:center; width:1.75rem; height:1.75rem;
              border-radius:9999px; background:var(--bleu); color:#fff; font-weight:700; font-size:.85rem; }
@@ -224,7 +224,7 @@
             </div>
             <div>
               <label class="block text-xs font-semibold mb-1">Accroche</label>
-              <input name="titre" value="{{ copy.titre }}" class="champ">
+              <textarea name="titre" rows="2" class="champ" placeholder="Une ligne, ou Entrée pour couper le titre">{{ copy.titre }}</textarea>
             </div>
             <div>
               <label class="block text-xs font-semibold mb-1">Sous-titre <span class="font-normal text-slate-400">(optionnel)</span></label>
