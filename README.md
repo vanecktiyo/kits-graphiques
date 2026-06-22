@@ -1,101 +1,129 @@
-# Générateur de kits graphiques — Gefradis
+# Générateur de kits graphiques · Gefradis
 
 Outil web qui **génère automatiquement des kits de bannières** pour les opérations
-commerciales de Gefradis (menuiserie PVC sur-mesure), à destination du métier
-marketing — **sans graphiste**.
+commerciales de Gefradis (menuiserie PVC sur-mesure), à destination du métier marketing,
+**sans graphiste**.
 
->  Projet réalisé dans le cadre d'un **test technique** pour une alternance
+> Projet réalisé dans le cadre d'un **test technique** pour une alternance
 > *Développeur IA* (Gefradis, groupe Im4Pulse).
 
-##  Objectif
+🔗 **Application en ligne :** https://gefradis-kits-569401851333.europe-west9.run.app
+
+## Objectif
 
 Permettre au marketing de produire, en quelques clics et **à la charte Gefradis**,
-l'ensemble des bannières d'une promotion (site web + publicité Google & Meta),
-prêtes à déployer.
+l'ensemble des bannières d'une opération commerciale (site web + publicité Google & Meta),
+aux dimensions exactes et prêtes à déployer.
 
-##  Fonctionnalités
+## Fonctionnalités
 
--  Saisie d'un **brief** : mécanique de remise, message commercial, formats souhaités
--  Génération du **texte** des bannières par IA (Claude)
--  **Composition** à la charte (couleurs, police Cabin, logo) aux **dimensions exactes**
--  **Aperçu**, **ajustement** et **régénération** avant export
--  Téléchargement du **kit complet** en `.zip`
--  Formats : site (Header HP desktop/mobile, bandeau catégorie), **Google Display**
-  (statique & animé), Google Pmax, Meta
+- Saisie d'un **brief** : mécanique de remise, message commercial, image, formats souhaités
+- Génération du **texte** des bannières par IA (Claude), renvoyé en **JSON structuré**
+- **Composition** à la charte (couleurs, police Cabin, logo) aux **dimensions exactes**
+- **Aperçu**, **ajustement à la main** (sans rappeler l'IA) et **régénération** avant export
+- Téléchargement du **kit complet** en `.zip`
+- Formats : site (Header HP desktop/mobile, bandeau catégorie), **Google Display**
+  (statique & animé GIF), Google Pmax, Meta
 
-##  Architecture & stack
+## Deux approches explorées
+
+Deux moteurs de montage ont été construits et comparés :
+
+- **A** : gabarits figés (un modèle HTML par type de bannière).
+- **B** : gabarit composable unique. Une seule trame adaptative ; le code calcule une
+  **disposition** par format (centré, côte à côte, empilé, bandeau…) et met le contenu
+  **à l'échelle** pour qu'il remplisse l'espace sans jamais déborder.
+
+La version **B a été retenue et déployée** : plus générique, elle s'adapte à n'importe
+quel brief et n'importe quel format. C'est elle qui tourne en ligne.
+
+## Principe clé
+
+> **L'IA rédige le texte ; le code compose et rend l'image.**
+
+Claude ne produit jamais de HTML : il renvoie seulement un **JSON** (accroche, sous-titre,
+offre, paliers, date…). Le code place ces données dans le gabarit de la charte, puis
+**Playwright (Chromium)** « photographie » le résultat en PNG. Résultat : aucun risque de
+HTML cassé, de charte non respectée ou de mauvaise dimension.
+
+## Architecture & stack
 
 | Couche | Technologie |
 |--------|-------------|
 | Backend / API | FastAPI |
 | Frontend | HTML/CSS + Tailwind |
-| Génération de texte | API Claude (SDK `anthropic`) |
-| Composition d'images | HTML/CSS → PNG via Playwright |
-| Production (cible) | Cloud Run · Vertex AI · Cloud Storage |
+| Génération de texte | API Claude (SDK `anthropic`, tool use → JSON) |
+| Composition d'images | HTML/CSS → PNG via Playwright (Chromium) |
+| Conteneurisation | Docker |
+| Production | **Cloud Run** + Secret Manager (clé) + Cloud Storage (sorties) |
+| Intégration continue | **CI/CD** via Cloud Build (push → build → déploiement auto) |
 
-📄 **Conception détaillée** : voir [`docs/conception.pdf`](docs/conception.pdf)
-(cahier de conception : besoins, architecture, cas d'utilisation, séquence,
-wireframe, plan de construction…).
+📄 **Conception détaillée** : [`docs/conception.pdf`](docs/conception.pdf)
+(besoins, architecture, cas d'utilisation, séquence, déploiement…).
 
-##  Installation
+## Installation (local)
 
 ```powershell
-# 1. Créer l'environnement virtuel
+# 1. Environnement virtuel
 python -m venv .venv
 
-# 2. Installer les dépendances
+# 2. Dépendances
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m playwright install chromium
 
-# 3. Configurer la clé API
-Copy-Item .env.example .env        # puis renseigner ANTHROPIC_API_KEY dans .env
+# 3. Clé API : créer un fichier .env à la racine contenant
+#    ANTHROPIC_API_KEY=sk-...
 ```
 
-##  Utilisation
+## Utilisation (local)
 
 ```powershell
-# Lancer l'application web (depuis la racine du projet)
-
-# Option 1 — simple (comme un app.py Flask)
-.\.venv\Scripts\python.exe backend\api.py
-
-# Option 2 — recommandée en développement (rechargement auto du code)
-.\.venv\Scripts\python.exe -m uvicorn api:app --app-dir backend --reload
+# Lancer la version déployée (B, composable) depuis la racine du projet
+.\.venv\Scripts\python.exe composable\backend\api.py
 ```
 
-Puis ouvrir **http://127.0.0.1:8000** : saisir un brief, générer, ajuster le texte,
+Puis ouvrir **http://127.0.0.1:8001** : saisir un brief, générer, ajuster le texte,
 puis télécharger le kit en `.zip`.
 
 ```powershell
-# (optionnel) Tester les briques en ligne de commande
-.\.venv\Scripts\python.exe backend/generer_copy.py   # brief -> copy (Claude)
-.\.venv\Scripts\python.exe backend/generer_kit.py    # copy -> kit de bannières
+# (optionnel) tester les briques en ligne de commande
+.\.venv\Scripts\python.exe composable\backend\generer_copy.py   # brief -> copy (Claude)
+.\.venv\Scripts\python.exe composable\backend\generer_kit.py    # copy -> kit de bannières
 ```
 
-##  Structure du projet
+## Déploiement
+
+L'application est conteneurisée (Docker) et déployée sur **Google Cloud Run** :
+
+- image stockée dans **Artifact Registry** ;
+- clé API fournie par **Secret Manager** (jamais dans le code ni l'image) ;
+- bannières générées écrites dans **Cloud Storage** (bucket partagé entre instances) ;
+- **CI/CD** : à chaque `git push` sur `main`, **Cloud Build** reconstruit l'image et
+  redéploie automatiquement (recette dans [`cloudbuild.yaml`](cloudbuild.yaml)).
+
+## Structure du projet
 
 ```
-entretient_dev_ia/
-├── backend/              # code Python + moteur de rendu
-│   ├── api.py            #   API FastAPI (les routes)
-│   ├── generer_copy.py   #   rédaction du copy via Claude
-│   ├── generer_kit.py    #   composition des bannières via Playwright
-│   ├── bannieres/        #   gabarits .j2 (le « moule » des bannières)
-│   └── demos/            #   anciens scripts d'apprentissage (archive)
-├── frontend/             # interface utilisateur
-│   ├── templates/        #   interface.html (la page de l'outil)
-│   └── static/           #   CSS/JS maison (Tailwind est en CDN)
-├── assets/               # ressources de marque : police Cabin, logo
-├── docs/                 # cahier de conception (LaTeX + PDF)
-├── output/               # kits générés (ignoré par git)
-├── .env.example          # modèle de configuration (clé API)
-├── requirements.txt      # dépendances Python
+kits-graphiques/
+├── composable/              # VERSION B (déployée) — gabarit composable unique
+│   ├── backend/
+│   │   ├── api.py             #   API FastAPI (port 8001)
+│   │   ├── generer_copy.py    #   brief -> copy JSON via Claude
+│   │   ├── generer_kit.py     #   copy -> bannières via Playwright
+│   │   └── bannieres/         #   gabarit .j2 (composable)
+│   ├── frontend/templates/    #   interface.html
+│   └── assets/                #   police Cabin, logo, images produit
+├── backend/, frontend/      # VERSION A (gabarits figés) — exploration
+├── docs/                    # cahier de conception + notes (LaTeX + PDF)
+├── Dockerfile               # image de production (Python + Chromium)
+├── cloudbuild.yaml          # recette CI/CD (Cloud Build)
+├── requirements.txt
 └── README.md
 ```
 
-##  Statut
+## Statut
 
- **Fonctionnel de bout en bout** : saisie du brief → génération du texte (Claude) →
-composition à la charte → aperçu → ajustement → téléchargement du kit `.zip`. Tous les
-formats sont produits, en versions **statique** (PNG) et **animée** (GIF, pour le Display).
-Conception détaillée : [`docs/conception.pdf`](docs/conception.pdf). Le déploiement
-Cloud Run est prévu en évolution.
+✅ **En production** : l'application est **déployée et accessible en ligne**, avec un
+**CI/CD** opérationnel. De bout en bout : brief → texte (Claude) → composition à la charte
+→ aperçu → ajustement → kit `.zip`. Tous les formats sont produits, en **statique** (PNG)
+et **animé** (GIF, pour le Display).
