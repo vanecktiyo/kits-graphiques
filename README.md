@@ -4,26 +4,26 @@ Outil web qui **génère automatiquement des kits de bannières** pour les opér
 commerciales de Gefradis (menuiserie PVC sur-mesure), à destination du métier
 marketing — **sans graphiste**.
 
-> 🧪 Projet réalisé dans le cadre d'un **test technique** pour une alternance
+>  Projet réalisé dans le cadre d'un **test technique** pour une alternance
 > *Développeur IA* (Gefradis, groupe Im4Pulse).
 
-## 🎯 Objectif
+##  Objectif
 
 Permettre au marketing de produire, en quelques clics et **à la charte Gefradis**,
 l'ensemble des bannières d'une promotion (site web + publicité Google & Meta),
 prêtes à déployer.
 
-## ✨ Fonctionnalités
+##  Fonctionnalités
 
-- 📝 Saisie d'un **brief** : mécanique de remise, message commercial, formats souhaités
-- 🤖 Génération du **texte** des bannières par IA (Claude)
-- 🎨 **Composition** à la charte (couleurs, police Cabin, logo) aux **dimensions exactes**
-- 👀 **Aperçu**, **ajustement** et **régénération** avant export
-- 📦 Téléchargement du **kit complet** en `.zip`
-- 🖼️ Formats : site (Header HP desktop/mobile, bandeau catégorie), **Google Display**
+-  Saisie d'un **brief** : mécanique de remise, message commercial, formats souhaités
+-  Génération du **texte** des bannières par IA (Claude)
+-  **Composition** à la charte (couleurs, police Cabin, logo) aux **dimensions exactes**
+-  **Aperçu**, **ajustement** et **régénération** avant export
+-  Téléchargement du **kit complet** en `.zip`
+-  Formats : site (Header HP desktop/mobile, bandeau catégorie), **Google Display**
   (statique & animé), Google Pmax, Meta
 
-## 🏗️ Architecture & stack
+##  Architecture & stack
 
 | Couche | Technologie |
 |--------|-------------|
@@ -37,7 +37,7 @@ prêtes à déployer.
 (cahier de conception : besoins, architecture, cas d'utilisation, séquence,
 wireframe, plan de construction…).
 
-## 🚀 Installation
+##  Installation
 
 ```powershell
 # 1. Créer l'environnement virtuel
@@ -50,7 +50,7 @@ python -m venv .venv
 Copy-Item .env.example .env        # puis renseigner ANTHROPIC_API_KEY dans .env
 ```
 
-## ▶️ Utilisation
+##  Utilisation
 
 ```powershell
 # Lancer l'application web (depuis la racine du projet)
@@ -71,7 +71,7 @@ puis télécharger le kit en `.zip`.
 .\.venv\Scripts\python.exe backend/generer_kit.py    # copy -> kit de bannières
 ```
 
-## 📁 Structure du projet
+##  Structure du projet
 
 ```
 entretient_dev_ia/
@@ -92,9 +92,9 @@ entretient_dev_ia/
 └── README.md
 ```
 
-## 📌 Statut
+##  Statut
 
-✅ **Fonctionnel de bout en bout** : saisie du brief → génération du texte (Claude) →
+ **Fonctionnel de bout en bout** : saisie du brief → génération du texte (Claude) →
 composition à la charte → aperçu → ajustement → téléchargement du kit `.zip`. Tous les
 formats sont produits, en versions **statique** (PNG) et **animée** (GIF, pour le Display).
 Conception détaillée : [`docs/conception.pdf`](docs/conception.pdf). Le déploiement
