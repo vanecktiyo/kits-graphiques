@@ -105,7 +105,7 @@
 \begin{flushleft}
 {\sffamily\large
 \textbf{Auteur :} Vaneck \\[0.2cm]
-\textbf{Version :} 0.6 (conception)\\[0.2cm]
+\textbf{Version :} 0.7 (conception)\\[0.2cm]
 \textbf{Date :} \today
 }
 \end{flushleft}
@@ -418,6 +418,7 @@ pour le cas de test :
 {
   "categorie":        "transversale",
   "titre":            "Gros projets = Grosses Remises",
+  "sous_titre":       "",
   "offre_type":       "montant",
   "offre_label":      "Jusqu'a",
   "offre_nombre":     "500",
@@ -431,14 +432,16 @@ pour le cas de test :
 \end{lstlisting}
 
 \textbf{Claude ne produit que ce JSON, jamais de HTML.} Il ne rédige que le
-\textbf{texte} (accroche, offre, paliers, date) et déduit quelques paramètres
+\textbf{texte} (accroche, sous-accroche, offre, paliers, date) et déduit quelques paramètres
 (catégorie, type d'offre, thème transverse). L'\textbf{image}, le \textbf{bouton}
 et la \textbf{couleur de fond} ne viennent PAS de Claude : ce sont des champs du
 \textbf{formulaire}. C'est ensuite le code Python qui injecte ces valeurs dans le
 gabarit, avant le rendu par Playwright ; ce choix garantit l'absence d'erreurs de
 parsing (HTML tronqué, guillemets mal échappés) et le respect strict des
 dimensions. Les champs clés : \texttt{categorie} (une des familles produit, ou
-\texttt{transversale}) sert à choisir l'image ; \texttt{offre\_type}
+\texttt{transversale}) sert à choisir l'image ; \texttt{sous\_titre} est une
+sous-accroche optionnelle (1 à 3 mots) posée sous le titre, plus petite et plus légère
+(ex. « Fenêtres » puis « sur-mesure ») ; \texttt{offre\_type}
 (\texttt{montant}, \texttt{pourcentage} ou \texttt{texte}) commande le rendu de
 l'offre ; \texttt{paliers} porte les niveaux de remise (2 à 3) pour une mécanique
 par paliers ; \texttt{date\_validite} l'échéance en mention complète ;
@@ -464,7 +467,7 @@ sur deux rôles complémentaires.
         déborder. Chaque rendu est conforme à la charte : c'est le cadre non
         négociable qui garantit le respect de la marque et des dimensions.
   \item \textbf{L'IA, concepteur-rédacteur (la créativité) :} à partir du brief,
-        Claude rédige le copy (accroche, offre, paliers, date) et \textbf{déduit} la
+        Claude rédige le copy (accroche, sous-accroche, offre, paliers, date) et \textbf{déduit} la
         catégorie, le type d'offre et, pour une opération transversale, le thème.
         L'\textbf{image}, le \textbf{bouton} et la \textbf{couleur de fond} sont
         choisis dans le \textbf{formulaire} (plus prévisible). Claude ne génère pas de
@@ -606,7 +609,7 @@ L'objectif est un rendu d'outil professionnel et lisible, distinct du style
 \section{Rôle de l'IA et stratégie de prompt}
 % =====================================================================
 \textbf{Ce que fait l'IA (Claude) :} elle joue le rôle de \emph{concepteur-rédacteur}.
-Elle rédige le copy (accroche, offre, paliers, date) et \textbf{déduit} quelques
+Elle rédige le copy (accroche, sous-accroche, offre, paliers, date) et \textbf{déduit} quelques
 paramètres structurés (catégorie, type d'offre, thème transversal). \textbf{Ce qu'elle
 ne fait pas :} choisir la mise en page (la \textbf{disposition} est calculée par le
 code à partir du format), choisir la couleur de fond, l'image ou le bouton (ce sont des
@@ -709,9 +712,15 @@ production, ce qui supprime les écarts d'environnement. Elle est stockée dans
         dans le code, injectée à l'exécution.
   \item \textbf{Cloud Storage} stocke les bannières générées, dans un bucket partagé monté
         comme dossier de sortie, donc visible par \textbf{toutes} les instances.
-  \item Le texte est produit via l'\textbf{API Anthropic directe} ; passer par
-        \textbf{Vertex AI} (Claude dans Model Garden) serait l'évolution 100\,\%
-        GCP-native (facturation et authentification unifiées).
+  \item Le texte est produit via l'\textbf{API Anthropic directe}. Le passage à
+        \textbf{Vertex AI} (Claude dans Model Garden) a été \textbf{évalué} : il
+        offrirait une intégration 100\,\% GCP-native (authentification par compte de
+        service, facturation unifiée) et la bascule de code est triviale (client
+        \texttt{AnthropicVertex}, même identifiant de modèle). Il est toutefois
+        \textbf{écarté pour ce projet} : Claude y est un \textbf{produit partenaire},
+        non activable avec un compte de facturation en \textbf{essai gratuit} (compte
+        payant requis, hors crédits d'essai). L'API directe, \textbf{fonctionnellement
+        identique}, a donc été conservée.
 \end{itemize}
 
 \subsection{Deux points d'attention résolus}
@@ -723,6 +732,15 @@ production, ce qui supprime les écarts d'environnement. Elle est stockée dans
         temporaire ; sans stockage partagé, des images générées manquaient d'une instance
         à l'autre. D'où l'écriture des sorties dans Cloud Storage.
 \end{itemize}
+
+\subsection{Intégration et déploiement continus (CI/CD)}
+Le déploiement est \textbf{automatisé}. Le dépôt GitHub est connecté à \textbf{Cloud
+Build} par un déclencheur : à chaque \texttt{git push} sur la branche \texttt{main}, une
+recette versionnée (\texttt{cloudbuild.yaml}) reconstruit l'image (image simple, sans
+attestation), la pousse dans Artifact Registry, puis redéploie automatiquement sur Cloud
+Run. Plus aucune commande manuelle : la chaîne \emph{code $\rightarrow$ build
+$\rightarrow$ registre $\rightarrow$ production} est entièrement déclenchée par le
+\texttt{push}.
 
 % =====================================================================
 \section{Décisions, hypothèses et question ouverte}
@@ -804,7 +822,7 @@ Regles STRICTES :
 - Garde le MEME message (court) sur tous les formats.
 - N'invente aucun chiffre : utilise seulement les conditions du brief.
 - Reponds UNIQUEMENT via l'outil (JSON valide), sans HTML.
-Champs : categorie, titre, offre_type (montant/pourcentage/texte), offre_label,
+Champs : categorie, titre, sous_titre, offre_type (montant/pourcentage/texte), offre_label,
 offre_nombre, offre_suffixe, offre_texte, paliers, date_validite, theme_transverse.
 L'image, le bouton et la couleur de fond ne sont PAS choisis par l'IA :
 ils viennent du formulaire.
@@ -824,6 +842,7 @@ Format vise : Meta 1080x1080 (carre)
 {
   "categorie": "transversale",
   "titre": "Gros projets = Grosses Remises",
+  "sous_titre": "",
   "offre_type": "montant",
   "offre_label": "Jusqu'a",
   "offre_nombre": "500",
@@ -838,7 +857,10 @@ Format vise : Meta 1080x1080 (carre)
 \vspace{1em}
 \hrule
 \vspace{0.5em}
-{\small\itshape Fin du cahier de conception (version 0.6). Version 0.6 : ajout d'une
+{\small\itshape Fin du cahier de conception (version 0.7). Version 0.7 : ajout du champ
+\texttt{sous\_titre} (sous-accroche optionnelle sous le titre) et de l'\textbf{intégration
+et déploiement continus} (CI/CD via Cloud Build : redéploiement automatique à chaque
+\texttt{git push} sur \texttt{main}). Version 0.6 : ajout d'une
 \textbf{section indépendante « Déploiement et mise en production »} (conteneurisation
 Docker, Cloud Run, Artifact Registry, Secret Manager, Cloud Storage ; API Anthropic
 directe, Vertex AI en évolution) reflétant l'application réellement \textbf{déployée en

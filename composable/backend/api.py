@@ -28,7 +28,7 @@ from generer_kit import FORMATS, SORTIE, generer_kit, themes_transverses
 
 RACINE = Path(__file__).resolve().parent.parent       # composable/
 
-app = FastAPI(title="Gefradis - Generateur de bannieres (Version B)")
+app = FastAPI(title="Gefradis - Generateur de kits graphiques")
 templates = Jinja2Templates(directory=str(RACINE / "frontend" / "templates"))
 app.mount("/output", StaticFiles(directory=str(RACINE / "output")), name="output")
 app.mount("/assets", StaticFiles(directory=str(RACINE / "assets")), name="assets")

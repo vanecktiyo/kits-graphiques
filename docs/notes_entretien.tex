@@ -729,4 +729,31 @@ c'est inactif. J'ai aussi résolu deux vrais problèmes de cloud : une image ref
 cause des attestations BuildKit, et le système de fichiers éphémère par-instance, corrigé
 en passant par un bucket Cloud Storage partagé. »}
 
+\subsection{Industrialisation : un pipeline CI/CD}
+Au départ, je redéployais \textbf{à la main} (les commandes ci-dessus). J'ai ensuite mis
+en place une \textbf{chaîne CI/CD} avec \textbf{Cloud Build}, connectée au dépôt GitHub :
+à chaque \texttt{git push} sur \texttt{main}, Cloud Build reconstruit l'image (image
+simple, sans attestation), la pousse dans Artifact Registry et redéploie automatiquement
+sur Cloud Run. Je ne tape plus aucune commande : je pousse mon code, et la nouvelle
+version est en ligne quelques minutes plus tard.
+
+\phrasea{« Pour ne plus déployer à la main, j'ai mis en place un pipeline CI/CD avec Cloud
+Build connecté à GitHub : à chaque push sur main, l'image est reconstruite, poussée dans
+Artifact Registry et déployée sur Cloud Run, automatiquement. J'ai donc la chaîne
+complète : conteneurisation, registre, déploiement continu. »}
+
+\subsection{Un arbitrage assumé : API directe plutôt que Vertex AI}
+J'ai \textbf{évalué} le passage à \textbf{Vertex AI} (Claude via Model Garden) pour rester
+100\,\% GCP-native. La bascule de code est triviale (client \texttt{AnthropicVertex}, même
+identifiant de modèle, authentification par compte de service au lieu d'une clé). Mais
+Claude y est un \textbf{produit partenaire}, \textbf{non activable avec un compte de
+facturation en essai gratuit} : il faut un compte payant, et les crédits d'essai ne
+couvrent pas les produits partenaires. Pour ce test, j'ai donc conservé l'\textbf{API
+Anthropic directe} (fonctionnellement identique) et documenté Vertex comme évolution prête.
+
+\phrasea{« J'ai regardé Vertex AI pour rester 100\,\% GCP, et le code aurait à peine changé.
+Mais Claude y est un produit partenaire, indisponible en essai gratuit : ça impose un compte
+payant. Pour ce test j'ai gardé l'API directe, identique côté résultat, en documentant
+Vertex comme évolution prête. C'est un arbitrage coût/valeur assumé. »}
+
 \end{document}
