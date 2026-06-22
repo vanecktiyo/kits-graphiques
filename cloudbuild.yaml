@@ -1,0 +1,36 @@
+# CI/CD — exécuté par Cloud Build à chaque push sur main (via un trigger).
+# 1) construit l'image Docker  2) la pousse dans Artifact Registry  3) déploie sur Cloud Run.
+substitutions:
+  _REGION: europe-west9
+  _SERVICE: gefradis-kits
+  _IMAGE: europe-west9-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/gefradis-kits
+
+steps:
+  # 1. Construire l'image. BuildKit désactivé -> image simple (pas de "manifest list"
+  #    avec attestations, que Cloud Run refuse à l'import).
+  - name: 'gcr.io/cloud-builders/docker'
+    env: ['DOCKER_BUILDKIT=0']
+    args: ['build', '-t', '${_IMAGE}:${COMMIT_SHA}', '-t', '${_IMAGE}:latest', '.']
+
+  # 2. Pousser les deux tags (le commit précis + latest).
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', '--all-tags', '${_IMAGE}']
+
+  # 3. Déployer sur Cloud Run. On ne passe que l'image : le reste de la config
+  #    (secret, bucket, mémoire, scaling) est conservé du service existant.
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - ${_SERVICE}
+      - --image=${_IMAGE}:${COMMIT_SHA}
+      - --region=${_REGION}
+      - --quiet
+
+images:
+  - '${_IMAGE}:${COMMIT_SHA}'
+  - '${_IMAGE}:latest'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
